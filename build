@@ -1,0 +1,42 @@
+#!/bin/sh
+#
+set -e
+
+err()
+{
+	printf "$0: $1\n" >&2
+	exit 1
+}
+
+ROOTDIR="/mnt/glacies"
+TOOLDIR="$(pwd)"
+mkdir -p "$DIRROOT"
+
+[ -z "$CC"  ] && CC=cc
+[ -z "$CXX" ] && CXX=c++
+
+. scripts/compiler/${COMPILER}.sh
+
+if [ ! -e .phase1 ]
+then
+	( [ -d tmp ] || mkdir tmp
+	cd tmp
+	compiler_prepare || err "failed to prepare the enviroment"
+	compiler_build   || err "failed to build the compiler" )
+
+	( cd tmp
+	git clone $RPORTS
+	cd ports
+	export PORTS=`pwd`
+	CC=`compiler_cc_path   0`
+	CXX=`compiler_cxx_path 0`
+	sed -e "s/CC=cc/CC=$CC/"                 \
+	    -e "s/CXX=c++/CXX=$CXX/"             \
+	    -e "s/DBDIR=/DBDIR=${TOOLDIR}\/tmp/" \
+	    -i mk/config.mk )
+
+	touch .phase1
+	printf "execute the script again with root permission\n"
+else
+	true
+fi
