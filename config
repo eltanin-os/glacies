@@ -1,0 +1,12 @@
+#!/bin/sh
+
+COMPILER="ellcc"
+RPORTS="git://github.com/eltanin-os/ports"
+
+ROOTDIR="/mnt/glacies"
+
+##
+COMPRESS="pigz -z"
+PKGSUF="pkg.tzz"
+TAR="pax -x ustar -w"
+

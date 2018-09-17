@@ -1,4 +1,6 @@
 #!/bin/sh
+#
+set -e
 
 REPOSITORY=""
 PKGMANREPO="git://github.com/eltanin-os/lux"

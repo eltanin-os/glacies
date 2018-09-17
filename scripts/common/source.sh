@@ -1,5 +1,10 @@
 #!/bin/sh
+# Environment:
+# * DIRPKGS
+# *
+set -e
 
+UNAR="tar -xzf"
 REPOSITORY=""
 
 # Libraries (ports)
@@ -27,9 +32,40 @@ TENV=`cat <<-EOF
 EOF
 `
 
+# copy from eltanin-os/ports
+__gendbfile()
+{
+	size=`du -sk .pkgroot | awk '{printf "%u", $1*1024}'`
+	pkgsize=`du -sk ${name} | awk '{printf "%u", $1*1024}'`
+	dirs=`find .pkgroot -type d -print | sed -e 's/.pkgroot\///g' -e 's/.pkgroot//g'`
+	files=`find -L .pkgroot -type f -print | sed -e 's/.pkgroot\///g' -e 's/.pkgroot//g'`
+	cat <<-EOF
+		name:$NAME
+		version:$VERSION
+		license:$LICENSE
+		description:$DESCRIPTION
+		size:$size
+		pkgsize:$pkgsize
+	EOF
+	for d in $RUNDEPS; do
+		printf "run-dep:${d}\n"
+	done
+	for d in $MAKEDEPS; do
+		# get package version from dbfile
+		d="${d}#`grep 'version' ${DBDIR}/${d} | sed 's/version://g'`"
+		printf "make-dep:${d}\n"
+	done
+	for d in $dirs; do
+		printf "dir:${d}\n"
+	done
+	for f in $files; do
+		printf "file:${f}\n"
+	done
+}
+
 port_compile()
 {
-	cd .
+	cd "$1"
 	./pkgbuild Prepare
 	./pkgbuild Build
 	./pkgbuild $2
@@ -49,29 +85,38 @@ tenv_compile()
 		cd "$(basename "$base" .tar.gz)"
 	fi
 
-	make CC=$CC CFLAGS=$CFLAGS CPPFLAGS=$CPPFLAGS
-	make DESTDIR="" install
+	patch -p1 < ${TOOLDIR}/scripts/patches/$1
+	make  CC=$CC CFLAGS=$CFLAGS CPPFLAGS=$CPPFLAGS
+	make  DESTDIR="$(pwd)/.pkgroot" install
+
+	olddir="$(pwd)"
+	name="${base}.${PKGSUF}"
+	( cd .pkgroot
+	  fakeroot -- $TAR . | $COMPRESS > "${olddir}/${name}" )
+	rm -rf .pkgroot
+	__gendbfile 1> dbfile
 }
 
+# External
 generate_env()
 {
-	cd .
 	for pkg in $LENV; do
-		( port_compile pkg Install )
+		( port_compile $pkg Install )
 	done
 }
 
 generate_pkgs()
 {
-	cd .
 	for pkg in $PENV; do
 		( port_compile $pkg Package
-		mv package $pkg_dir
-		mv dbfile  ${pkg_dir}/$pkg )
+		pkgname="$(basename $pkg).${PKGSUF}"
+		mv $pkgname $DIRPKGS
+		mv dbfile   ${DIRPKGS}/$pkg )
 	done
 	for pkg in $TENV; do
-		( tenv_compile $pkg 
-		mv package $pkg_dir
-		mv dbfile  ${pkgdir}/$pkg )
+		( tenv_compile $pkg
+		pkgname="$(basename $pkg).${PKGSUF}"
+		mv $pkgname $DIRPKGS
+		mv dbfile   ${DIRPKGS}/$pkg )
 	done
 }

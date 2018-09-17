@@ -8,14 +8,13 @@ err()
 	exit 1
 }
 
-ROOTDIR="/mnt/glacies"
 TOOLDIR="$(pwd)"
-mkdir -p "$DIRROOT"
 
 [ -z "$CC"  ] && CC=cc
 [ -z "$CXX" ] && CXX=c++
 
 . scripts/compiler/${COMPILER}.sh
+. scripts/common/source.sh
 
 if [ ! -e .phase1 ]
 then
@@ -25,17 +24,22 @@ then
 	compiler_build   || err "failed to build the compiler" )
 
 	( cd tmp
-	git clone $RPORTS
+	git clone "$RPORTS"
 	cd ports
-	export PORTS=`pwd`
-	CC=`compiler_cc_path   0`
-	CXX=`compiler_cxx_path 0`
+	export PORTS="$(pwd)"
+	CC="$(compiler_cc_path   0)"
+	CXX="$(compiler_cxx_path 0)"
 	sed -e "s/CC=cc/CC=$CC/"                 \
 	    -e "s/CXX=c++/CXX=$CXX/"             \
 	    -e "s/DBDIR=/DBDIR=${TOOLDIR}\/tmp/" \
-	    -i mk/config.mk )
+	    -i mk/config.mk
 
-	touch .phase1
+	( export ROOT="${TOOLDIR}/tmp" # env var used inside ports
+	  generate_env  || err "failed to generate the local libraries" )
+
+	generate_pkgs || err "failed to generate packages" )
+
+	touch  .phase1
 	printf "execute the script again with root permission\n"
 else
 	true
