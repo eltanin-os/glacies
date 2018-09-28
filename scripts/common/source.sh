@@ -76,21 +76,26 @@ tenv_compile()
 	base="$(basename "$1")"
 	type="$(printf "%.3s" $1)"
 
+	${TOOLDIR}/common/pkginfo.sh ${base}
+
 	if [ "$type" == "git" ]; then
 		git clone $1
 		cd $base
+		VERSION="$(git rev-parse HEAD)"
 	else
 		$FETCH $1
 		$UNAR  $base
-		cd "$(basename "$base" .tar.gz)"
+		base="$(basename "$base" .tar.gz)"
+		cd     $base
 	fi
 
-	patch -p1 < ${TOOLDIR}/scripts/patches/$1
+	pname="${TOOLDIR}/scripts/patches/${base}"
+	[ -f "$pname" ] && patch -p1 < "$pname"
 	make  CC=$CC CFLAGS=$CFLAGS CPPFLAGS=$CPPFLAGS
 	make  DESTDIR="$(pwd)/.pkgroot" install
 
 	olddir="$(pwd)"
-	name="${base}.${PKGSUF}"
+	name="${NAME}#${VERSION}.${PKGSUF}"
 	( cd .pkgroot
 	  fakeroot -- $TAR . | $COMPRESS > "${olddir}/${name}" )
 	rm -rf .pkgroot
