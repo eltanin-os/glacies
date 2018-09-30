@@ -4,7 +4,6 @@
 # *
 set -e
 
-UNAR="tar -xzf"
 REPOSITORY=""
 
 # Libraries (ports)
@@ -28,7 +27,7 @@ TENV=`cat <<-EOF
 	git://github.com/eltanin-os/lux
 	git://git.suckless.org/sinit
 	git://git.suckless.org/ubase
-	http://b0llix.net/perp/distfiles/perp-2.07.tar.gz
+	git://github.com/eadwardus/perp
 EOF
 `
 
@@ -74,19 +73,16 @@ port_compile()
 tenv_compile()
 {
 	base="$(basename "$1")"
-	type="$(printf "%.3s" $1)"
 
 	${TOOLDIR}/common/pkginfo.sh ${base}
 
-	if [ "$type" == "git" ]; then
-		git clone $1
-		cd $base
+	git clone $1
+	cd  $base
+
+	if [ "$VERSION" == "master" ]; then
 		VERSION="$(git rev-parse HEAD)"
 	else
-		$FETCH $1
-		$UNAR  $base
-		base="$(basename "$base" .tar.gz)"
-		cd     $base
+		git checkout tags/${VERSION}
 	fi
 
 	pname="${TOOLDIR}/scripts/patches/${base}"
