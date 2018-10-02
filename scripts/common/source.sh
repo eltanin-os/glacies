@@ -72,7 +72,7 @@ port_compile()
 
 tenv_compile()
 {
-	base="$(basename "$1")"
+	base="$(basename \"$1\")"
 
 	${TOOLDIR}/common/pkginfo.sh ${base}
 
@@ -82,7 +82,7 @@ tenv_compile()
 	if [ "$VERSION" == "master" ]; then
 		VERSION="$(git rev-parse HEAD)"
 	else
-		git checkout tags/${VERSION}
+		git checkout tags/v${VERSION}
 	fi
 
 	pname="${TOOLDIR}/scripts/patches/${base}"
