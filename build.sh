@@ -13,6 +13,7 @@ TOOLDIR="$(pwd)"
 [ -z "$CC"  ] && CC=cc
 [ -z "$CXX" ] && CXX=c++
 
+. config.sh
 . scripts/compiler/${COMPILER}.sh
 . scripts/common/source.sh
 
