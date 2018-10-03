@@ -1,0 +1,73 @@
+Index: scripts/libraries
+===================================================================
+--- scripts/libraries	(revision 7618)
++++ scripts/libraries	(working copy)
+@@ -3,16 +3,16 @@
+ ## musl (libc) and compiler-rt are handled specially in the make-libraries script.
+ ## Comment out any undesired libraries with a single '#'.
+ ## The next three libraries are required to build binutils-gdb and LLVM/clang.
+-curses
+-expat
++#curses
++#expat
+ libcxx
+ ## The following libraries are not used for ELLCC proper, but should be built
+ ## in order where libraries that depend on other libraries are built later.
+-mbedtls
+-c-ares
+-zlib
+-libssh2
+-libmetalink
+-nghttp2
+-curl
+-libedit
++#mbedtls
++#c-ares
++#zlib
++#libssh2
++#libmetalink
++#nghttp2
++#curl
++#libedit
+Index: scripts/make-ecc
+===================================================================
+--- scripts/make-ecc	(revision 7618)
++++ scripts/make-ecc	(working copy)
+@@ -37,14 +37,14 @@
+   run ${SCRIPTS}/build-llvm -cp
+ fi
+ 
+-if [ ! -d ${SRCTOP}/binutils-gdb ] ; then
+-  # Get and  patch the binutils-gdb sources.
+-  run ${SCRIPTS}/build-binutils-gdb -cp ${TARGETTUPLE}
+-fi
++#if [ ! -d ${SRCTOP}/binutils-gdb ] ; then
++#  # Get and  patch the binutils-gdb sources.
++#   run ${SCRIPTS}/build-binutils-gdb -cp ${TARGETTUPLE}
++#fi
+ 
+ if [ "${TOOLS}" = "host" ] ; then
+   # Using the host tools. Build just enough to bootstrap.
+-  run ${SCRIPTS}/build-binutils-gdb -Cbi
++  # run ${SCRIPTS}/build-binutils-gdb -Cbi
+   run ${SCRIPTS}/build-llvm -Cbi
+   # Recalculate.
+   source ${SCRIPTS}/support ${TARGETTUPLE}
+@@ -52,7 +52,7 @@
+ 
+ if [ "${TOOLS}" = "clang" ] ; then
+   # Using clang tools. Build just enough to bootstrap.
+-  run ${SCRIPTS}/build-binutils-gdb -Cbi
++  # run ${SCRIPTS}/build-binutils-gdb -Cbi
+   run ${SCRIPTS}/build-llvm -Cbi
+   # Recalculate.
+   source ${SCRIPTS}/support ${TARGETTUPLE}
+@@ -101,7 +101,7 @@
+ run cd ${TOP}
+ 
+ # Configure, build, and install binutils with ecc.
+-run ${SCRIPTS}/build-binutils-gdb -Cbi ${TARGETTUPLE}
++# run ${SCRIPTS}/build-binutils-gdb -Cbi ${TARGETTUPLE}
+ 
+ # RICH: Test basic compiled code functionality for each target.
+ 

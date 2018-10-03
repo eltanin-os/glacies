@@ -85,8 +85,10 @@ tenv_compile()
 		git checkout tags/v${VERSION}
 	fi
 
-	pname="${TOOLDIR}/scripts/patches/${base}"
-	[ -f "$pname" ] && patch -p1 < "$pname"
+	for patch in "${TOOLDIR}/scripts/patches/${base}/*"; do
+		patch -p1 < $patch
+	done
+
 	make  CC=$CC CFLAGS=$CFLAGS CPPFLAGS=$CPPFLAGS
 	make  DESTDIR="$(pwd)/.pkgroot" install
 
