@@ -4,6 +4,7 @@
 # *
 set -e
 
+DIRPKGS="${TOOLDIR}/tmp/pkg"
 REPOSITORY=""
 
 # Libraries (ports)
@@ -112,13 +113,13 @@ generate_pkgs()
 {
 	for pkg in $PENV; do
 		( port_compile $pkg Package
-		pkgname="$(basename $pkg).${PKGSUF}"
+		pkgname="${NAME}#${VERSION}.${PKGSUF}"
 		mv $pkgname $DIRPKGS
 		mv dbfile   ${DIRPKGS}/$pkg )
 	done
 	for pkg in $TENV; do
 		( tenv_compile $pkg
-		pkgname="$(basename $pkg).${PKGSUF}"
+		pkgname="${NAME}#${VERSION}.${PKGSUF}"
 		mv $pkgname $DIRPKGS
 		mv dbfile   ${DIRPKGS}/$pkg )
 	done
