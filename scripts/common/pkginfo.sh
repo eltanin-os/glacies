@@ -1,3 +1,5 @@
+set -a
+
 case "$1" in
 "lux")
 	NAME="lux"
@@ -24,8 +26,3 @@ case "$1" in
 	DESCRIPTION="a persistent process supervisor and service managment framework for un!x"
 	;;
 esac
-
-export NAME
-export VERSION
-export LICENSE
-export DESCRIPTION
