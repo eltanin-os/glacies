@@ -105,7 +105,8 @@ tenv_compile()
 generate_env()
 {
 	for pkg in $LENV; do
-		( port_compile $pkg Install )
+		( port_compile $pkg Install
+		mv dbfile "${TOOLDIR}/tmp/$NAME" )
 	done
 }
 
@@ -115,12 +116,12 @@ generate_pkgs()
 		( port_compile $pkg Package
 		pkgname="${NAME}#${VERSION}.${PKGSUF}"
 		mv $pkgname $DIRPKGS
-		mv dbfile   ${DIRPKGS}/$pkg )
+		mv dbfile   ${DIRPKGS}/$NAME )
 	done
 	for pkg in $TENV; do
 		( tenv_compile $pkg
 		pkgname="${NAME}#${VERSION}.${PKGSUF}"
 		mv $pkgname $DIRPKGS
-		mv dbfile   ${DIRPKGS}/$pkg )
+		mv dbfile   ${DIRPKGS}/$NAME )
 	done
 }
