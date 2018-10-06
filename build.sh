@@ -43,5 +43,36 @@ then
 	touch  .phase1
 	printf "execute the script again with root permission\n"
 else
-	true
+	cd "${ROOTDIR}"
+
+	# generate directories
+	mkdir boot dev etc home media mnt opt srv usr var
+	mkdir -m 0750 root
+	mkdir -m 1777 tmp
+	ln -s usr/bin bin sbin
+	ln -s usr/lib lib
+
+	( cd usr
+	mkdir bin include lib libexec lib share src
+	ln -s bin sbin )
+
+	( cd var
+	mkdir lib lock log pkg run spool )
+
+	( cd var/pkg
+	mkdir cache local remote )
+
+	# prepare package manager and minimal packages
+	DPKGS="${TOOLDIR}/tmp/pkg"
+
+	( ${TOOLDIR}/common/pkginfo.sh lux
+	$UNCOMPRESS -c "${DPKGS}/${NAME}#${VERSION}.${PKGSUF}" | $UNTAR
+	rm -f "${DPKGS}/${NAME}#${VERSION}.${PKGSUF}"
+	mv "${DPKGS}/${NAME}" var/pkg/local )
+
+	mv "${DPKGS}/*.${PKGSUF}" var/pkg/cache
+	mv "${DPKGS}/*"           var/pkg/remote
+
+	( cd "${TOOLDIR}/tmp"
+	compiler_install )
 fi
