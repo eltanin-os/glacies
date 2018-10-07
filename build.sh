@@ -66,7 +66,7 @@ else
 	DPKGS="${TOOLDIR}/tmp/pkg"
 
 	( ${TOOLDIR}/common/pkginfo.sh lux
-	$UNCOMPRESS -c "${DPKGS}/${NAME}#${VERSION}.${PKGSUF}" | $UNTAR
+	$UNCOMPRESS "${DPKGS}/${NAME}#${VERSION}.${PKGSUF}" | $UNTAR
 	rm -f "${DPKGS}/${NAME}#${VERSION}.${PKGSUF}"
 	mv "${DPKGS}/${NAME}" var/pkg/local )
 

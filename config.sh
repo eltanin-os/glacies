@@ -9,7 +9,7 @@ ROOTDIR="/mnt/glacies"
 ##
 FETCH="curl -LO"
 COMPRESS="pigz -z"
-UNCOMPRESS="pigz -d"
+UNCOMPRESS="pigz -dc"
 PKGSUF="pkg.tzz"
 TAR="pax -x ustar -w"
 UNTAR="pax -x ustar -r"
