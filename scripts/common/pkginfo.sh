@@ -21,7 +21,7 @@ case "$1" in
 	;;
 "perp")
 	NAME="perp"
-	VERSION="master"
+	VERSION="2.07"
 	LICENSE="CUSTOM"
 	DESCRIPTION="a persistent process supervisor and service managment framework for un!x"
 	;;
