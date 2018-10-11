@@ -60,7 +60,7 @@ else
 	mkdir lib lock log pkg run spool )
 
 	( cd var/pkg
-	mkdir cache local remote )
+	mkdir cache local remote tmp )
 
 	# prepare package manager and minimal packages
 	DPKGS="${TOOLDIR}/tmp/pkg"
@@ -71,7 +71,7 @@ else
 	mv "${DPKGS}/${NAME}" var/pkg/local )
 
 	mv "${DPKGS}/*.${PKGSUF}" var/pkg/cache
-	mv "${DPKGS}/*"           var/pkg/remote
+	mv "${DPKGS}/*"           var/pkg/tmp
 
 	( cd "${TOOLDIR}/tmp"
 	compiler_install )
