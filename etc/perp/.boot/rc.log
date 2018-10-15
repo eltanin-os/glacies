@@ -1,0 +1,12 @@
+#!/bin/sh
+
+logdir="/var/log/perd"
+
+[ ! -d "$logdir" ]; then
+	mkdir "$logdir"
+	chown -R log:log $logdir
+	chmod 0755 $logdir
+fi
+
+exec runuid log\
+     tinylog -k 8 -s 100000 -t -z $logdir

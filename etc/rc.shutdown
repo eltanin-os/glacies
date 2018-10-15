@@ -1,0 +1,12 @@
+#!/bin/sh
+
+case "$1" in
+"poweroff")
+	arg="-p"
+	;;
+"reboot")
+	arg="-r"
+	;;
+esac
+
+exec /usr/libexec/shutdown $arg

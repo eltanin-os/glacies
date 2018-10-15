@@ -1,0 +1,8 @@
+export PATH=/usr/bin
+export MANPATH=/usr/share/man
+export XDG_RUNTIME_DIR=/tmp
+
+export PERP_BASE=/etc/perp
+export PERP_CTL=/var/run/perp
+
+export PS1="\$ "

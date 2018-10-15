@@ -1,0 +1,4 @@
+#!/bin/sh
+mount -a
+/etc/rc.local
+exec perpboot /etc/perp
