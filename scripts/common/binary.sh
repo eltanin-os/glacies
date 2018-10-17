@@ -6,10 +6,12 @@ REPOSITORY=""
 PKGMANREPO="git://github.com/eltanin-os/lux"
 
 PACKAGES=`cat <<-EOF
+	bzip2
 	cbase
 	mandoc
 	mksh
 	perp
+	pigz
 	sinit
 	ubase
 	utilchest

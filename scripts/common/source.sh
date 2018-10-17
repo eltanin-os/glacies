@@ -16,6 +16,8 @@ EOF
 
 # Packages (ports)
 PENV=`cat <<-EOF
+	archivers/bzip2
+	archivers/pigz
 	shells/mksh
 	sysutils/cbase
 	sysutils/mandoc
