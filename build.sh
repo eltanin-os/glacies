@@ -8,7 +8,7 @@ err()
 	exit 1
 }
 
-TOOLDIR="$(pwd)"
+export TOOLDIR="$(pwd)"
 
 [ -z "$CC"  ] && CC=cc
 [ -z "$CXX" ] && CXX=c++
@@ -36,7 +36,8 @@ then
 	    -i mk/config.mk
 
 	( export ROOT="${TOOLDIR}/tmp" # env var used inside ports
-	  generate_env  || err "failed to generate the local libraries" )
+	export DBDIR="$ROOT"
+	generate_env  || err "failed to generate the local libraries" )
 
 	generate_pkgs || err "failed to generate packages" )
 
@@ -75,4 +76,6 @@ else
 
 	( cd "${TOOLDIR}/tmp"
 	compiler_install )
+
+	cp -R "${TOOLDIR}/etc" .
 fi
