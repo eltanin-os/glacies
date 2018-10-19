@@ -58,7 +58,7 @@ else
 	ln -s bin sbin )
 
 	( cd var
-	mkdir lib lock log pkg run spool )
+	mkdir empty lib lock log pkg run spool )
 
 	( cd var/pkg
 	mkdir cache local remote tmp )
