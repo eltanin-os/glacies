@@ -77,5 +77,10 @@ else
 	( cd "${TOOLDIR}/tmp"
 	compiler_install )
 
+	# prepare environment
 	cp -R "${TOOLDIR}/etc" .
+
+	( cd usr
+	git clone "$RPORTS"
+	ln -s lksh bin/sh )
 fi
