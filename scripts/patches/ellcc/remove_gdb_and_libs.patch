@@ -1,3 +1,24 @@
+Index: scripts/build-binutils-gdb
+===================================================================
+--- scripts/build-binutils-gdb	(revision 7618)
++++ scripts/build-binutils-gdb	(working copy)
+@@ -52,11 +52,11 @@
+   HOST_CC="${HOST_CC} -static"
+ fi
+ 
+-check_library libc++.a "Disabling gdb build."
+-if [ "${CROSS}" != "yes" -a "$?" != "0" ] ; then
+-  # C++ isn't ready yet, don't build gdb.
+-  DISABLE_GDB="--disable-gdb --disable-libdecnumber --disable-readline --disable-sim"
+-fi
++#check_library libc++.a "Disabling gdb build."
++#if [ "${CROSS}" != "yes" -a "$?" != "0" ] ; then
++#  # C++ isn't ready yet, don't build gdb.
++DISABLE_GDB="--disable-gdb --disable-libdecnumber --disable-readline --disable-sim"
++#fi
+ 
+ configure() {
+   # Configuring package binutils-gdb for all targets, adding a couple.
 Index: scripts/libraries
 ===================================================================
 --- scripts/libraries	(revision 7618)
@@ -29,45 +50,3 @@ Index: scripts/libraries
 +#nghttp2
 +#curl
 +#libedit
-Index: scripts/make-ecc
-===================================================================
---- scripts/make-ecc	(revision 7618)
-+++ scripts/make-ecc	(working copy)
-@@ -37,14 +37,14 @@
-   run ${SCRIPTS}/build-llvm -cp
- fi
- 
--if [ ! -d ${SRCTOP}/binutils-gdb ] ; then
--  # Get and  patch the binutils-gdb sources.
--  run ${SCRIPTS}/build-binutils-gdb -cp ${TARGETTUPLE}
--fi
-+#if [ ! -d ${SRCTOP}/binutils-gdb ] ; then
-+#  # Get and  patch the binutils-gdb sources.
-+#   run ${SCRIPTS}/build-binutils-gdb -cp ${TARGETTUPLE}
-+#fi
- 
- if [ "${TOOLS}" = "host" ] ; then
-   # Using the host tools. Build just enough to bootstrap.
--  run ${SCRIPTS}/build-binutils-gdb -Cbi
-+  # run ${SCRIPTS}/build-binutils-gdb -Cbi
-   run ${SCRIPTS}/build-llvm -Cbi
-   # Recalculate.
-   source ${SCRIPTS}/support ${TARGETTUPLE}
-@@ -52,7 +52,7 @@
- 
- if [ "${TOOLS}" = "clang" ] ; then
-   # Using clang tools. Build just enough to bootstrap.
--  run ${SCRIPTS}/build-binutils-gdb -Cbi
-+  # run ${SCRIPTS}/build-binutils-gdb -Cbi
-   run ${SCRIPTS}/build-llvm -Cbi
-   # Recalculate.
-   source ${SCRIPTS}/support ${TARGETTUPLE}
-@@ -101,7 +101,7 @@
- run cd ${TOP}
- 
- # Configure, build, and install binutils with ecc.
--run ${SCRIPTS}/build-binutils-gdb -Cbi ${TARGETTUPLE}
-+# run ${SCRIPTS}/build-binutils-gdb -Cbi ${TARGETTUPLE}
- 
- # RICH: Test basic compiled code functionality for each target.
- 
