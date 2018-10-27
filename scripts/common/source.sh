@@ -75,7 +75,7 @@ port_compile()
 
 tenv_compile()
 {
-	base="$(basename \"$1\")"
+	base="$(basename "$1")"
 
 	${TOOLDIR}/common/pkginfo.sh ${base}
 
@@ -99,8 +99,8 @@ tenv_compile()
 	name="${NAME}#${VERSION}.${PKGSUF}"
 	( cd .pkgroot
 	  fakeroot -- $TAR . | $COMPRESS > "${olddir}/${name}" )
-	rm -rf .pkgroot
 	__gendbfile 1> dbfile
+	rm -rf .pkgroot
 }
 
 # External
