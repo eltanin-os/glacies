@@ -3,7 +3,7 @@ set -a
 case "$1" in
 "lux")
 	NAME="lux"
-	VERSION="1.0"
+	VERSION="1.1"
 	LICENSE="UNLICENSE"
 	DESCRIPTION="simple package manager"
 	;;
