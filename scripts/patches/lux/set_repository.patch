@@ -1,0 +1,37 @@
+diff --git a/inc/config.h b/inc/config.h
+index 116b777..8811a4d 100644
+--- a/inc/config.h
++++ b/inc/config.h
+@@ -3,8 +3,8 @@
+ #define PKG_RDB "/var/pkg/remote/"
+ #define PKG_TMP "/var/pkg/cache/"
+ 
+-#define PKG_SRC "url"
+-#define PKG_SDB "url"
++#define PKG_SRC "https://sourceforge.net/projects/eltanin-os/files/repository/glacies/x86_64/"
++#define PKG_SDB "https://sourceforge.net/projects/eltanin-os/files/repository/glacies/"
+ #define PKG_FDB "remote.db"
+ #define PKG_FMT ".pkg.tzz"
+ #define PKG_SIG ".sig"
+diff --git a/src/lux.c b/src/lux.c
+index b724c2b..e6277ad 100644
+--- a/src/lux.c
++++ b/src/lux.c
+@@ -197,7 +197,7 @@ fetch(Package *pkg)
+ 			goto failure;
+ 		}
+ 
+-		S(tmp, "%.*s%s", URL_MAX, PKG_SRC, file);
++		S(tmp, "%.*s%s/download", URL_MAX, PKG_SRC, file);
+ 		if (netfd(tmp, fd[i], NULL) < 0)
+ 			goto failure;
+ 	}
+@@ -344,7 +344,7 @@ update(void)
+ 		goto failure;
+ 	}
+ 
+-	S(buf, "%.*s%s", URL_MAX, PKG_SDB, PKG_FDB);
++	S(buf, "%.*s%s/download", URL_MAX, PKG_SDB, PKG_FDB);
+ 
+ 	if (netfd(buf, fd[0], NULL) < 0)
+ 		goto failure;

@@ -1,0 +1,31 @@
+diff --git a/Makefile b/Makefile
+index b526421..2c118df 100644
+--- a/Makefile
++++ b/Makefile
+@@ -148,7 +148,7 @@ LIBUTILOBJ = $(LIBUTILSRC:.c=.o)
+ OBJ = $(BIN:=.o) $(LIBUTILOBJ)
+ SRC = $(BIN:=.c)
+ 
+-all: $(BIN)
++all: ubase-box
+ 
+ $(BIN): $(LIB)
+ 
+@@ -167,7 +167,7 @@ $(LIBUTIL): $(LIBUTILOBJ)
+ 	$(AR) rc $@ $?
+ 	$(RANLIB) $@
+ 
+-install: all
++__install: all
+ 	mkdir -p $(DESTDIR)$(PREFIX)/bin
+ 	cp -f $(BIN) $(DESTDIR)$(PREFIX)/bin
+ 	cd $(DESTDIR)$(PREFIX)/bin && chmod 755 $(BIN)
+@@ -209,7 +209,7 @@ ubase-box: $(LIB) $(SRC)
+ 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ build/*.c $(LIB) $(LDLIBS)
+ 	rm -r build
+ 
+-ubase-box-install: ubase-box
++install: ubase-box
+ 	mkdir -p $(DESTDIR)$(PREFIX)/bin
+ 	cp -f ubase-box $(DESTDIR)$(PREFIX)/bin
+ 	chmod 755 $(DESTDIR)$(PREFIX)/bin/ubase-box

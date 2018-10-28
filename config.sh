@@ -2,9 +2,13 @@
 #
 set -a
 
+ARCH="x86_64"
 COMPILER="ellcc"
-RPORTS="git://github.com/eltanin-os/ports"
 ROOTDIR="/mnt/glacies"
+
+##
+RPORTS="git://github.com/eltanin-os/ports"
+KHEADS="git://github.com/sabotage-linux/kernel-headers"
 
 ##
 FETCH="curl -LO"
