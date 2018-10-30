@@ -17,6 +17,15 @@ export TOOLDIR="$(pwd)"
 . scripts/compiler/${COMPILER}.sh
 . scripts/common/source.sh
 
+( type awk || err "dependency awk not found"
+compress=""$(printf "$COMPRESS" | awk '{ print $1 }')""
+fetch="$(printf "$FETCH" | awk '{ print $1 }')"
+tar="$(printf "$TAR" | awk '{ print $1 }')"
+
+for i in $compress fakeroot $fetch git make $tar; do
+	type $i || err "dependency $i not found"
+done )
+
 if [ ! -e .phase1 ]
 then
 	( [ -d tmp ] || mkdir tmp
