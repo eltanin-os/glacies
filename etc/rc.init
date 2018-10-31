@@ -1,4 +1,18 @@
 #!/bin/sh
+
+mount -t devtmpfs dev /dev -o nosuid,mode=755
+
+mkdir /dev/pts
+mkdir /dev/shm
+
+mount -t proc none /proc
+
+smdev -s
+printf "/bin/smdev\n" > /proc/sys/kernel/hotplugdone
+
+mount -o remount,rw /
 mount -a
+
 /etc/rc.local
+
 exec perpboot /etc/perp

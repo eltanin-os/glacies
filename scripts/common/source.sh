@@ -30,6 +30,7 @@ TENV=`cat <<-EOF
 	git://github.com/eltanin-os/lux
 	git://github.com/eadwardus/perp
 	git://git.suckless.org/sinit
+	git://git.suckless.org/smdev
 	git://git.suckless.org/ubase
 EOF
 `
