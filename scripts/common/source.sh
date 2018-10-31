@@ -28,9 +28,9 @@ EOF
 # Packages (non-ports)
 TENV=`cat <<-EOF
 	git://github.com/eltanin-os/lux
+	git://github.com/eadwardus/perp
 	git://git.suckless.org/sinit
 	git://git.suckless.org/ubase
-	git://github.com/eadwardus/perp
 EOF
 `
 
@@ -92,8 +92,13 @@ tenv_compile()
 		patch -p1 < $patch
 	done
 
-	make  CC=$CC CFLAGS=$CFLAGS CPPFLAGS=$CPPFLAGS
-	make  DESTDIR="$(pwd)/.pkgroot" install
+	make CC=$CC\
+	     CFLAGS=$CFLAGS\
+	     CPPFLAGS=$CPPFLAGS\
+	     PREFIX=$PREFIX\
+	     MANPREFIX=$MANDIR
+
+	make DESTDIR="$(pwd)/.pkgroot" install
 
 	olddir="$(pwd)"
 	name="${NAME}#${VERSION}.${PKGSUF}"

@@ -52,6 +52,9 @@ then
 	    -e "s/DBDIR=\"/DBDIR=\"${TOOLDIR}\/tmp/"           \
 	    -i mk/config.mk
 
+	. mk/config.mk
+	. ${TOOLDIR}/config.mk
+
 	( export ROOT="${TOOLDIR}/tmp" # env var used inside ports
 	export DBDIR="$ROOT"
 	generate_env  || err "failed to generate the local libraries" )
@@ -61,6 +64,8 @@ then
 	touch  .phase1
 	printf "execute the script again with root permission\n"
 else
+	[ "$(whoami)" != "root" ] && err "root permission are needed"
+
 	cd "${ROOTDIR}"
 
 	# generate directories
