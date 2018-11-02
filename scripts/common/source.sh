@@ -89,7 +89,7 @@ tenv_compile()
 		git checkout tags/v${VERSION}
 	fi
 
-	for patch in "${TOOLDIR}/scripts/patches/${base}/*"; do
+	for patch in ${TOOLDIR}/scripts/patches/${base}/*; do
 		patch -p1 < $patch
 	done
 
