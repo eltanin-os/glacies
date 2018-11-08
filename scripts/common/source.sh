@@ -11,6 +11,7 @@ REPOSITORY=""
 LENV=`cat <<-EOF
 	devel/libz
 	devel/ncurses
+	net-devel/libnl-tiny
 EOF
 `
 
@@ -18,6 +19,11 @@ EOF
 PENV=`cat <<-EOF
 	archivers/bzip2
 	archivers/pigz
+	devel/m4
+	devel/make
+	devel/samurai
+	net/curl
+	net/wpa_supplicant
 	shells/mksh
 	sysutils/cbase
 	sysutils/mandoc
