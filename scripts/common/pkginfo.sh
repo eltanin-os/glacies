@@ -17,7 +17,7 @@ case "$1" in
 	NAME="perp"
 	VERSION="2.07"
 	LICENSE="CUSTOM"
-	DESCRIPTION="a persistent process supervisor and service managment framework for un!x"
+	DESCRIPTION="A persistent process supervisor and service managment framework for un*x."
 	;;
 "sdhcp")
 	NAME="sdhcp"
@@ -29,18 +29,18 @@ case "$1" in
 	NAME="sinit"
 	VERSION="1.1"
 	LICENSE="MIT"
-	DESCRIPTION="a suckless init, initially based on Rich Felker’s minimal init"
+	DESCRIPTION="A suckless init."
 	;;
 "smdev")
 	NAME="smdev"
 	VERSION="master"
 	LICENSE="MIT"
-	DESCRIPTION="a mostly mdev-compatible suckless program to manage device nodes"
+	DESCRIPTION="A mostly mdev-compatible suckless program to manage device nodes."
 	;;
 "ubase")
 	NAME="ubase"
 	VERSION="master"
 	LICENSE="MIT"
-	DESCRIPTION="a collection of unportable tools, similar in spirit to util-linux but much simpler"
+	DESCRIPTION="A collection of unportable tools."
 	;;
 esac
