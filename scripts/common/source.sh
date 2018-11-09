@@ -106,11 +106,14 @@ tenv_compile()
 	     MANPREFIX=$MANDIR
 
 	make DESTDIR="$(pwd)/.pkgroot" install
+	make DESTDIR="$(pwd)/.pkgroot" install-man 2>/dev/null || true
 
 	olddir="$(pwd)"
 	name="${NAME}#${VERSION}.${PKGSUF}"
 	( cd .pkgroot
-	  fakeroot -- $TAR . | $COMPRESS > "${olddir}/${name}" )
+	__manpages="-name *.1 $(printf "-o -name *.%s " $(seq 2 8))"
+	find ./${MANDIR} -type f $__manpages -exec $COMPRESS {} +
+	fakeroot -- $TAR . | $COMPRESS > "${olddir}/${name}" )
 	__gendbfile 1> dbfile
 	rm -rf .pkgroot
 }
