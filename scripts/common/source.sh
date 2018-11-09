@@ -33,11 +33,12 @@ EOF
 
 # Packages (non-ports)
 TENV=`cat <<-EOF
-	git://github.com/eltanin-os/lux
-	git://github.com/eadwardus/perp
+	git://git.kernel.org/pub/scm/network/iproute2/iproute2
 	git://git.suckless.org/sinit
 	git://git.suckless.org/smdev
 	git://git.suckless.org/ubase
+	git://github.com/eadwardus/perp
+	git://github.com/eltanin-os/lux
 EOF
 `
 
