@@ -7,6 +7,12 @@ case "$1" in
 	LICENSE="UNLICENSE"
 	DESCRIPTION="a simple package manager"
 	;;
+"iproute2")
+	NAME="iproute2"
+	VERSION="4.19.0"
+	LICENSE="GPL-2"
+	DESCRIPTION="A set of utilities for Linux networking."
+	;;
 "perp")
 	NAME="perp"
 	VERSION="2.07"
