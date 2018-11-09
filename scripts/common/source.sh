@@ -33,6 +33,7 @@ EOF
 
 # Packages (non-ports)
 TENV=`cat <<-EOF
+	git://git.2f30.org/sdhcp
 	git://git.kernel.org/pub/scm/network/iproute2/iproute2
 	git://git.suckless.org/sinit
 	git://git.suckless.org/smdev

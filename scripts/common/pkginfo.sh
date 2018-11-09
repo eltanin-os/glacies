@@ -19,6 +19,12 @@ case "$1" in
 	LICENSE="CUSTOM"
 	DESCRIPTION="a persistent process supervisor and service managment framework for un!x"
 	;;
+"sdhcp")
+	NAME="sdhcp"
+	VERSION="master"
+	LICENSE="MIT"
+	DESCRIPTION="A suckless dhcp client."
+	;;
 "sinit")
 	NAME="sinit"
 	VERSION="1.1"
