@@ -5,7 +5,7 @@ case "$1" in
 	NAME="lux"
 	VERSION="1.1"
 	LICENSE="UNLICENSE"
-	DESCRIPTION="a simple package manager"
+	DESCRIPTION="A simple package manager."
 	;;
 "iproute2")
 	NAME="iproute2"
