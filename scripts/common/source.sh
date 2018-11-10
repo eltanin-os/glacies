@@ -115,7 +115,7 @@ tenv_compile()
 	( cd .pkgroot
 	__manpages="-name *.1 $(printf "-o -name *.%s " $(seq 2 8))"
 	find ./${MANDIR} -type f $__manpages -exec $COMPRESS {} +
-	fakeroot -- $TAR . | $COMPRESS > "${olddir}/${name}" )
+	fakeroot -- $TAR . | $PKGCOMP > "${olddir}/${name}" )
 	__gendbfile 1> dbfile
 	rm -rf .pkgroot
 }
