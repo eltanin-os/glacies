@@ -1,0 +1,17 @@
+[vars]
+name=sdhcp
+version=master
+license=MIT
+description=A suckless dhcp client.
+
+[mirrors]
+git://git.2f30.org/sdhcp
+
+[mdeps]
+libc
+
+[build]
+${PORTS}/mk/default.sh
+
+[install]
+${PORTS}/mk/default.sh install

@@ -1,0 +1,17 @@
+[vars]
+name=sinit
+version=1.1
+license=MIT
+description=A suckless init.
+
+[mirrors]
+git://git.suckless.org/sinit
+
+[mdeps]
+libc
+
+[build]
+${PORTS}/mk/portsys_mk_make.sh
+
+[install]
+${PORTS}/mk/portsys_mk_make.sh install

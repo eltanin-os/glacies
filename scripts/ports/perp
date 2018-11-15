@@ -1,0 +1,17 @@
+[vars]
+name=perp
+version=2.07
+license=CUSTOM
+description=A persistent process supervisor and service managment framework for un*x.
+
+[mirrors]
+git://github.com/eadwardus/perp
+
+[mdeps]
+libc
+
+[build]
+${PORTS}/mk/portsys_mk_default.sh
+
+[install]
+${PORTS}/mk/portsys_mk_default.sh install

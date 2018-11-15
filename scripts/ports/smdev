@@ -1,0 +1,17 @@
+[vars]
+name=smdev
+version=master
+license=MIT
+description=A mostly mdev-compatible suckless program to manage device nodes.
+
+[mirrors]
+git://git.suckless.org/smdev
+
+[mdeps]
+libc
+
+[build]
+${PORTS}/mk/portsys_mk_make.sh
+
+[install]
+${PORTS}/mk/portsys_mk_make.sh install

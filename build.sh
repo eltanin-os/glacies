@@ -42,6 +42,8 @@ then
 	make prefix=/ DESTDIR="${TOOLDIR}/tmp" install )
 	git clone "$RPORTS"
 	cd ports
+	cp ${TOOLDIR}/scripts/ports/*         pkg
+	cp ${TOOLDIR}/scripts/patches/ports/* patches
 	export PORTS="$(pwd)"
 	CC="$(compiler_cc_path   0)"
 	CXX="$(compiler_cxx_path 0)"
@@ -51,14 +53,8 @@ then
 	    -e "s/LDFLAGS=\"/LDFLAGS=\"-L${TOOLDIR}/tmp/lib"   \
 	    -e "s/DBDIR=\"/DBDIR=\"${TOOLDIR}\/tmp/"           \
 	    -i mk/config.mk
-
 	. mk/config.mk
 	. ${TOOLDIR}/config.mk
-
-	( export ROOT="${TOOLDIR}/tmp" # env var used inside ports
-	export DBDIR="$ROOT"
-	generate_env  || err "failed to generate the local libraries" )
-
 	generate_pkgs || err "failed to generate packages" )
 
 	touch  .phase1
@@ -69,15 +65,12 @@ else
 	cd "${ROOTDIR}"
 
 	# generate directories
-	mkdir boot dev etc home media mnt opt srv usr var
+	mkdir bin boot dev etc home include lib libexec\
+	      media mnt opt share src srv usr var
 	mkdir -m 0750 root
 	mkdir -m 1777 tmp
-	ln -s usr/bin bin sbin
-	ln -s usr/lib lib
-
-	( cd usr
-	mkdir bin include lib libexec lib share src
-	ln -s bin sbin )
+	ln -s . usr
+	ln -s bin sbin
 
 	( cd var
 	mkdir empty lib lock log pkg run spool )
@@ -86,25 +79,27 @@ else
 	mkdir cache local remote tmp )
 
 	# prepare package manager and minimal packages
-	DPKGS="${TOOLDIR}/tmp/pkg"
+	DIRPKGS="${TOOLDIR}/tmp/packages"
+	DIRDB=="${TOOLDIR}/tmp/database"
 
-	( ${TOOLDIR}/common/pkginfo.sh lux
-	$UNCOMPRESS "${DPKGS}/${NAME}#${VERSION}.${PKGSUF}" | $UNTAR
-	rm -f "${DPKGS}/${NAME}#${VERSION}.${PKGSUF}"
-	mv "${DPKGS}/${NAME}" var/pkg/local )
+	# take name and version from lux port entry
+	# then extract it to the system
+	( tmp="$(mktemp)"
+	head -n 3 ${TOOLDIR}/scripts/ports/lux | sed '/\[vars\]/d' 1> $tmp
+	. $tmp
+	$UNCOMPRESS "${DIRPKGS}/${name}#${version}.$pkgsuf" | $UNTAR
+	rm $tmp )
 
-	mv "${DPKGS}/*.${PKGSUF}" var/pkg/cache
-	mv "${DPKGS}/*"           var/pkg/tmp
+	mv "${DIRPKGS}/*" var/pkg/cache
+	mv "${DIRDB}/*"   var/pkg/tmp
 
 	( cd "${TOOLDIR}/tmp"
 	compiler_install )
 
 	# prepare environment
 	cp -R "${TOOLDIR}/etc" .
-
-	( cd usr
+	ln -s lksh bin/sh
 	git clone "$RPORTS"
-	ln -s lksh bin/sh )
 
 	# prepare the environment to chroot
 	mount -t proc none proc

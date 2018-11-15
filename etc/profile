@@ -1,7 +1,8 @@
-export PATH=/usr/bin
-export PORTS=/usr/ports
-export MANPATH=/usr/share/man
+export PATH=/bin
+export PORTS=/ports
+export MANPATH=/share/man
 export XDG_RUNTIME_DIR=/tmp
+export PKG_CONFIG=/bin/pkgconf
 
 export PERP_BASE=/etc/perp
 export PERP_CTL=/var/run/perp

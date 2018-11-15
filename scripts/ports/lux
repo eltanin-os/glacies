@@ -1,0 +1,21 @@
+[vars]
+name=lux
+version=1.1
+license=UNLICENSE
+description=A simple package manager.
+
+[patches]
+0001-lux-set_repository.patch
+
+[mirrors]
+git://github.com/eltanin-os/lux
+
+[mdeps]
+libc
+
+[build]
+${PORTS}/mk/portsys_mk_make.sh
+
+[install]
+${PORTS}/mk/portsys_mk_make.sh install
+${PORTS}/mk/portsys_mk_make.sh install-man
