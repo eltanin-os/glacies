@@ -47,12 +47,13 @@ then
 	export PORTS="$(pwd)"
 	CC="$(compiler_cc_path   0)"
 	CXX="$(compiler_cxx_path 0)"
-	sed -e "s/CC=\"cc\"/CC=\"$CC\"/"                       \
-	    -e "s/CXX=\"c++\"/CXX=\"$CXX\"/"                   \
-	    -e "s/CFLAGS=\"/CFLAGS=\"-I${TOOLDIR}/tmp/include" \
-	    -e "s/LDFLAGS=\"/LDFLAGS=\"-L${TOOLDIR}/tmp/lib"   \
-	    -e "s/DBDIR=\"/DBDIR=\"${TOOLDIR}\/tmp/"           \
-	    -i mk/config.mk
+	sed -e "s/CC=\"cc\"/CC=\"$CC\"/"                           \
+	    -e "s/CXX=\"c++\"/CXX=\"$CXX\"/"                       \
+	    -e "s/CFLAGS=\"/CFLAGS=\"-I${TOOLDIR}\/tmp\/include /" \
+	    -e "s/LDFLAGS=\"/LDFLAGS=\"-L${TOOLDIR}\/tmp\/lib /"   \
+	    -e "s/DBDIR=\"/DBDIR=\"${TOOLDIR}\/tmp/"               \
+	    mk/config.mk > \~config.mk
+	mv \~config.mk mk/config.mk
 	. mk/config.mk
 	. ${TOOLDIR}/config.mk
 	generate_pkgs || err "failed to generate packages" )
@@ -113,13 +114,11 @@ else
 		chroot . lux -N add      "/${pkg}"
 		chroot . lux -N register "/${pkg}"
 	done
-	chroot . lux update
-	chroot . lux fetch    linux-headers
-	chroot . lux fetch    linux-image
-	chroot . lux explode  linux-headers
-	chroot . lux explode  linux-image
-	chroot . lux add      linux-headers
-	chroot . lux add      linux-image
-	chroot . lux register linux-headers
-	chroot . lux register linux-image
+	chroot . lux  update
+	for pkg in linux-headers linux-image; do
+		chroot . lux fetch    $pkg
+		chroot . lux explode  $pkg
+		chroot . lux add      $pkg
+		chroot . lux register $pkg
+	done
 fi
