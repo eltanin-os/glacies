@@ -11,7 +11,7 @@ git://git.2f30.org/sdhcp
 libc
 
 [build]
-${PORTS}/mk/default.sh
+${PORTS}/mk/portsys_mk_make.sh
 
 [install]
-${PORTS}/mk/default.sh install
+${PORTS}/mk/portsys_mk_make.sh install

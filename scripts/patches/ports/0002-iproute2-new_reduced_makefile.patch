@@ -295,11 +295,11 @@ index b7488add..089a8b75 100644
 -	echo "static const char SNAPSHOT[] = \""`date +%y%m%d`"\";" \
 -		> include/SNAPSHOT.h
 +	install -dm 755        $(DESTDIR)/$(PREFIX)/bin
++	$(STRIP) $(BIN)
 +	install -cm 755 $(BIN) $(DESTDIR)/$(PREFIX)/bin
-+	$(STRIP) $(DESTDIR)/$(PREFIX)/bin/*
 +	install -dm 755         $(DESTDIR)/$(MANPREFIX)/man8
 +	install -cm 644 $(MAN8) $(DESTDIR)/$(MANPREFIX)/man8
- 
+
  clean:
 -	@for i in $(SUBDIRS) testsuite; \
 -	do $(MAKE) $(MFLAGS) -C $$i clean; done

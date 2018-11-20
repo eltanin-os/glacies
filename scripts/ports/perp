@@ -11,7 +11,16 @@ git://github.com/eadwardus/perp
 libc
 
 [build]
-${PORTS}/mk/portsys_mk_default.sh
+cat <<-EOF > conf.mk
+CC=$CC
+CFLAGS=$CFLAGS $CPPFLAGS
+LDFLAGS=$LDFLAGS
+STRIP=$STRIP
+BINDIR=$BINDIR
+SBINDIR=$SBINDIR
+MANDIR=$MANDIR
+EOF
+make
 
 [install]
-${PORTS}/mk/portsys_mk_default.sh install
+make DESTDIR=$DESTDIR install

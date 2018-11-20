@@ -4,6 +4,9 @@ version=master
 license=MIT
 description=A collection of unportable tools.
 
+[patches]
+0001-ubase-remove_duplicated.patch
+
 [mirrors]
 git://git.suckless.org/ubase
 

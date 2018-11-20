@@ -1,0 +1,51 @@
+Remove clear, id and mknod
+
+The base system will include utilchest and cbase that already includes
+these binaries.
+
+diff --git a/Makefile b/Makefile
+index b526421..89139b6 100644
+--- a/Makefile
++++ b/Makefile
+@@ -39,7 +39,6 @@ LIB = $(LIBUTIL)
+ BIN = \
+ 	blkdiscard        \
+ 	chvt              \
+-	clear             \
+ 	ctrlaltdel        \
+ 	dd                \
+ 	df                \
+@@ -52,7 +51,6 @@ BIN = \
+ 	getty             \
+ 	halt              \
+ 	hwclock           \
+-	id                \
+ 	insmod            \
+ 	killall5          \
+ 	last              \
+@@ -61,7 +59,6 @@ BIN = \
+ 	lsmod             \
+ 	lsusb             \
+ 	mesg              \
+-	mknod             \
+ 	mkswap            \
+ 	mount             \
+ 	mountpoint        \
+@@ -92,17 +89,14 @@ BIN = \
+ 
+ MAN1 = \
+ 	chvt.1              \
+-	clear.1             \
+ 	dd.1                \
+ 	df.1                \
+ 	dmesg.1             \
+ 	eject.1             \
+ 	fallocate.1         \
+ 	free.1              \
+-	id.1                \
+ 	login.1             \
+ 	mesg.1              \
+-	mknod.1             \
+ 	mountpoint.1        \
+ 	pagesize.1          \
+ 	passwd.1            \

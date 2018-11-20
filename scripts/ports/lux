@@ -12,6 +12,8 @@ git://github.com/eltanin-os/lux
 
 [mdeps]
 libc
+libressl
+libz
 
 [build]
 ${PORTS}/mk/portsys_mk_make.sh
