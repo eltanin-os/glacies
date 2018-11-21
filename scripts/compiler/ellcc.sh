@@ -32,7 +32,7 @@ compiler_build()
 {
 	( cd ellcc
 	./ellcc build )
-	( cd var/pkg/local
+	( cd database
 	printf "version:git-a08910fc2cc739f631b75b2d09b8d72a0d64d285" > libc )
 }
 
