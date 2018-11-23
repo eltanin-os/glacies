@@ -1,5 +1,5 @@
 diff --git a/inc/config.h b/inc/config.h
-index 116b777..8811a4d 100644
+index 9f82c66..2dca015 100644
 --- a/inc/config.h
 +++ b/inc/config.h
 @@ -3,8 +3,8 @@
@@ -14,24 +14,24 @@ index 116b777..8811a4d 100644
  #define PKG_FMT ".pkg.tzz"
  #define PKG_SIG ".sig"
 diff --git a/src/lux.c b/src/lux.c
-index b724c2b..e6277ad 100644
+index 54c442c..252a255 100644
 --- a/src/lux.c
 +++ b/src/lux.c
-@@ -197,7 +197,7 @@ fetch(Package *pkg)
- 			goto failure;
+@@ -204,7 +204,7 @@ fetch(Package *pkg)
  		}
  
--		S(tmp, "%.*s%s", URL_MAX, PKG_SRC, file);
-+		S(tmp, "%.*s%s/download", URL_MAX, PKG_SRC, file);
- 		if (netfd(tmp, fd[i], NULL) < 0)
+ 		tmp.n -= membuf_vstrcat(&tmp, PKG_SRC,
+-		         pkg->name, "#", pkg->version);
++		         pkg->name, "#", pkg->version, "/download");
+ 		if (netfd(tmp.p, fd[i], NULL) < 0)
  			goto failure;
  	}
-@@ -344,7 +344,7 @@ update(void)
+@@ -358,7 +358,7 @@ update(void)
  		goto failure;
  	}
  
--	S(buf, "%.*s%s", URL_MAX, PKG_SDB, PKG_FDB);
-+	S(buf, "%.*s%s/download", URL_MAX, PKG_SDB, PKG_FDB);
+-	p.n -= membuf_vstrcat(&p, PKG_SDB, PKG_FDB);
++	p.n -= membuf_vstrcat(&p, PKG_SDB, PKG_FDB, "/download");
  
- 	if (netfd(buf, fd[0], NULL) < 0)
+ 	if (netfd(p.p, fd[0], NULL) < 0)
  		goto failure;
