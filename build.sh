@@ -52,10 +52,8 @@ then
 	    -e "s/CFLAGS=\"/CFLAGS=\"-I${TOOLDIR}\/tmp\/include /" \
 	    -e "s/LDFLAGS=\"/LDFLAGS=\"-L${TOOLDIR}\/tmp\/lib /"   \
 	    -e "s/DBDIR=\"/DBDIR=\"${TOOLDIR}\/tmp/"               \
-	    mk/config.mk > \~config.mk
-	mv \~config.mk mk/config.mk
-	. mk/config.mk
-	. ${TOOLDIR}/config.mk
+	    mk/config.mk > config.mk~
+	mv config.mk~ mk/config.mk
 	generate_pkgs || err "failed to generate packages" )
 
 	touch  .phase1

@@ -27,7 +27,6 @@ PACKAGES="$(cat <<-EOF
 	perp
 	pigz
 	pkgconf
-	samurai
 	sdhcp
 	sinit
 	smdev
