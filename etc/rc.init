@@ -13,6 +13,10 @@ printf "/bin/smdev\n" > /proc/sys/kernel/hotplugdone
 mount -o remount,rw /
 mount -a
 
+hostname $(cat /etc/hostname)
+ip link set lo up
+dmesg >/var/log/dmesg.log
+
 /etc/rc.local
 
 exec perpboot /etc/perp
