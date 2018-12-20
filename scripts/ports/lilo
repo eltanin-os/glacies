@@ -1,0 +1,37 @@
+[vars]
+name=lilo
+version=24.2
+license=BSD-3
+description=The classic OS boot loader.
+cksum=4437cae21345f483194a5dc95f686f3f3cb2beec78faae3fba959db25eae29fe2c56732e055c05f1d101682c5d442cdc9561fae8074f61f5537dde0413204c54
+
+[patches]
+0001-lilo-remove__GLIBC__.patch
+0002-lilo-remove_dynamic_initialization_from_constant_declaration.patch
+0003-lilo-remove_gcc_checkit.patch
+
+[mirrors]
+http://ftp.debian.org/debian/pool/main/l/lilo/lilo_24.2.orig.tar.gz
+
+[mdeps]
+libc
+
+[build]
+for i in Makefile src/Makefile; do
+sed -e 's/CPP=$(CC)/CPP=$(CC) $(CFLAGS)/g'\
+    -e 's|^\tmake|\t$(MAKE)|g'\
+    -e '/images install/d'\
+    -e '/images all/d'\
+    -e '/CC=/d' $i > ${i}~
+mv ${i}~ $i
+done
+sed -e "s|MAN_DIR=.*|MAN_DIR=$MANDIR|g"\
+    -e "s|SBIN_DIR=.*|SBIN_DIR=$BINDIR|g"\
+    -e "s|CFG_DIR=.*|CFG_DIR=$ETCDIR|g"\
+    -e "s|BOOT_DIR=.*|BOOT_DIR=$BINDIR|g"\
+    -e "s|USRSBIN_DIR=.*|USRSBIN_DIR=$BINDIR|g" make.vars > make.vars~
+mv make.vars~ make.vars
+${PORTS}/mk/portsys_mk_make.sh LC_ALL=C
+
+[install]
+${PORTS}/mk/portsys_mk_make.sh install

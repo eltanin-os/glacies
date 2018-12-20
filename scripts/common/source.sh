@@ -19,6 +19,7 @@ PACKAGES="$(cat <<-EOF
 	cbase
 	curl
 	iproute2
+	lilo
 	lux
 	m4
 	make

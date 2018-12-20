@@ -1,0 +1,34 @@
+diff -Naur a/checkit b/checkit
+--- a/checkit	2010-11-01 13:52:58.000000000 -0200
++++ b/checkit	2018-12-19 22:04:12.664945336 -0200
+@@ -47,18 +47,18 @@
+ }
+ 
+ #echo
+-echo GCC version $gccmin or later is required
+-gcc -v 1>foo1 2>foo2
+-V=`cat foo1 foo2 | cut -d' ' -f1-3 | grep -i version | tr '-' ' ' | cut -d' ' -f 3`
+-rm -f foo1 foo2
+-if [ -z "$V" ]; then
+-	echo gcc is not present
+-	ret=1
+-else
+-	vers_min $V $gccmin
+-	echo gcc version $V
+-	if [ $rc = 0 ]; then echo OKAY; else echo ERROR; ret=1; fi
+-fi
++#echo GCC version $gccmin or later is required
++#gcc -v 1>foo1 2>foo2
++#V=`cat foo1 foo2 | cut -d' ' -f1-3 | grep -i version | tr '-' ' ' | cut -d' ' -f 3`
++#rm -f foo1 foo2
++#if [ -z "$V" ]; then
++#	echo gcc is not present
++#	ret=1
++#else
++#	vers_min $V $gccmin
++#	echo gcc version $V
++#	if [ $rc = 0 ]; then echo OKAY; else echo ERROR; ret=1; fi
++#fi
+ 
+ echo
+ echo AS86 version $bccmin or later is required

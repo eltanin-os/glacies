@@ -24,7 +24,10 @@ tar="$(printf "$TAR" | awk '{ print $1 }')"
 
 for i in $compress fakeroot $fetch git make $tar; do
 	type $i || err "dependency $i not found"
-done )
+done
+# lilo
+type as86 || err "dependency as86 not found"
+type ld86 || err "dependency ld86 not found" )
 
 if [ ! -e .phase1 ]
 then
