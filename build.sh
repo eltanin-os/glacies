@@ -109,17 +109,16 @@ else
 	mount --rbind /dev dev
 	cp /etc/resolv.conf etc
 
-	# use lux on chroot
-	for pkg in var/pkg/tmp/*; do
-		chroot . lux -N explode  "/${pkg}"
-		chroot . lux -N add      "/${pkg}"
-		chroot . lux -N register "/${pkg}"
-	done
-	chroot . lux  update
-	for pkg in linux-headers linux-image; do
-		chroot . lux fetch    $pkg
-		chroot . lux explode  $pkg
-		chroot . lux add      $pkg
-		chroot . lux register $pkg
-	done
+	# use lux to install packages
+	PKGR="linux-headers linux-image"
+	PKGL="var/pkg/tmp/*"
+	chroot . /bin/sh <<-EOF
+		lux -N explode  $PKGL
+		lux -N add      $PKGL
+		lux -N register $PKGL
+		lux fetch    $PKGR
+		lux explode  $PKGR
+		lux add      $PKGR
+		lux register $PKGR
+	EOF
 fi
