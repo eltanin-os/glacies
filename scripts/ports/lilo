@@ -9,9 +9,10 @@ cksum=4437cae21345f483194a5dc95f686f3f3cb2beec78faae3fba959db25eae29fe2c56732e05
 0001-lilo-remove__GLIBC__.patch
 0002-lilo-remove_dynamic_initialization_from_constant_declaration.patch
 0003-lilo-remove_gcc_checkit.patch
+0004-lilo-avoid_real_environment.patch
 
 [mirrors]
-http://ftp.debian.org/debian/pool/main/l/lilo/lilo_24.2.orig.tar.gz
+http://ftp.debian.org/debian/pool/main/l/lilo/lilo_${version}.orig.tar.gz
 
 [mdeps]
 libc

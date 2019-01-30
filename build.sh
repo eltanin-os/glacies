@@ -8,32 +8,37 @@ err()
 	exit 1
 }
 
+havedep()
+{
+	for dep in ${@}; do
+		type $dep || err "dependency $dep not found" >&2
+	done
+}
+
+gettool()
+{
+	printf "%s " $1
+}
+
 export TOOLDIR="$(pwd)"
 
 [ -z "$CC"  ] && CC=cc
 [ -z "$CXX" ] && CXX=c++
 
-. config.sh
-. scripts/compiler/${COMPILER}.sh
-. scripts/common/source.sh
+. ./config.sh
+. ./scripts/compiler/${COMPILER}.sh
+. ./scripts/common/source.sh
 
-( type awk || err "dependency awk not found"
-compress=""$(printf "$COMPRESS" | awk '{ print $1 }')""
-fetch="$(printf "$FETCH" | awk '{ print $1 }')"
-tar="$(printf "$TAR" | awk '{ print $1 }')"
-
-for i in $compress fakeroot $fetch git make $tar; do
-	type $i || err "dependency $i not found"
-done
+( deps="$(gettool $COMPRESS && gettool $FETCH && gettool $TAR)"
+havedep awk byacc fakeroot git make $deps
 # lilo
-type as86 || err "dependency as86 not found"
-type ld86 || err "dependency ld86 not found" )
+havedep as86 ld86 )
 
 if [ ! -e .phase1 ]
 then
 	( [ -d tmp ] || mkdir tmp
 	cd tmp
-	mkdir -p var/pkg/local )
+	mkdir database packages )
 
 	( cd tmp
 	compiler_prepare || err "failed to prepare the enviroment"
@@ -43,18 +48,20 @@ then
 	git clone "$KHEADS"
 	( cd kernel-headers
 	make prefix=/ DESTDIR="${TOOLDIR}/tmp" install )
+	CC="$(compiler_cc_path   0)"
+	CXX="$(compiler_cxx_path 0)"
 	git clone "$RPORTS"
 	cd ports
 	cp ${TOOLDIR}/scripts/ports/*         pkg
 	cp ${TOOLDIR}/scripts/patches/ports/* patches
 	export PORTS="$(pwd)"
-	CC="$(compiler_cc_path   0)"
-	CXX="$(compiler_cxx_path 0)"
-	sed -e "s/CC=\"cc\"/CC=\"$CC\"/"                           \
-	    -e "s/CXX=\"c++\"/CXX=\"$CXX\"/"                       \
-	    -e "s/CFLAGS=\"/CFLAGS=\"-I${TOOLDIR}\/tmp\/include /" \
-	    -e "s/LDFLAGS=\"/LDFLAGS=\"-L${TOOLDIR}\/tmp\/lib /"   \
-	    -e "s/DBDIR=\"/DBDIR=\"${TOOLDIR}\/tmp/"               \
+	sed -e "s|^CC=.*|CC=\"$CC\"|g"                             \
+	    -e "s|^CXX=.*|CXX=\"$CXX\"|g"                          \
+	    -e "s|^CFLAGS=\"|CFLAGS=\"-I${TOOLDIR}/tmp/include |g" \
+	    -e "s|^YACC=|##YACC=|g"                                \
+	    -e "s|^#YACC=|YACC=|g"                                 \
+	    -e "s|^LDFLAGS=\"|LDFLAGS=\"-L${TOOLDIR}/tmp/lib |g"   \
+	    -e "s|^DBDIR=.*|DBDIR=\"${TOOLDIR}/tmp/database\"|g"   \
 	    mk/config.mk > config.mk~
 	mv config.mk~ mk/config.mk
 	generate_pkgs || err "failed to generate packages" )
@@ -68,7 +75,7 @@ else
 
 	# generate directories
 	mkdir bin boot dev etc home include lib libexec\
-	      media mnt opt share src srv usr var
+	      media mnt opt proc share src srv sys var
 	mkdir -m 0750 root
 	mkdir -m 1777 tmp
 	ln -s . usr
@@ -82,18 +89,25 @@ else
 
 	# prepare package manager and minimal packages
 	DIRPKGS="${TOOLDIR}/tmp/packages"
-	DIRDB=="${TOOLDIR}/tmp/database"
+	DIRDB="${TOOLDIR}/tmp/database"
 
-	# take name and version from lux port entry
-	# then extract it to the system
+	# take name and version from ports
 	( tmp="$(mktemp)"
-	head -n 3 ${TOOLDIR}/scripts/ports/lux | sed '/\[vars\]/d' 1> $tmp
+	head -n 3 ${TOOLDIR}/tmp/ports/pkg/lux | sed '/\[vars\]/d' 1> $tmp
 	. $tmp
-	$UNCOMPRESS "${DIRPKGS}/${name}#${version}.$pkgsuf" | $UNTAR
+	$UNCOMPRESS "${DIRPKGS}/${name}#${version}.$PKGSUF" | $UNTAR
 	rm $tmp )
 
-	mv "${DIRPKGS}/*" var/pkg/cache
-	mv "${DIRDB}/*"   var/pkg/tmp
+	( tmp="$(mktemp)"
+	head -n 3 ${TOOLDIR}/tmp/ports/pkg/mksh | sed '/\[vars\]/d' 1> $tmp
+	. $tmp
+	$UNCOMPRESS "${DIRPKGS}/${name}#${version}.$PKGSUF" | $UNTAR
+	rm $tmp )
+
+	cp ${DIRPKGS}/*  var/pkg/cache
+	cp ${DIRDB}/libc var/pkg/local
+	cp ${DIRDB}/*    var/pkg/tmp
+	rm var/pkg/tmp/libc
 
 	( cd "${TOOLDIR}/tmp"
 	compiler_install )
@@ -116,6 +130,7 @@ else
 		lux -N explode  $PKGL
 		lux -N add      $PKGL
 		lux -N register $PKGL
+		lux update
 		lux fetch    $PKGR
 		lux explode  $PKGR
 		lux add      $PKGR

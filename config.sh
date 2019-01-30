@@ -2,6 +2,7 @@
 #
 set -a
 
+HOSTARCH="x86_64"
 ARCH="x86_64"
 COMPILER="ellcc"
 ROOTDIR="/mnt/glacies"
@@ -18,3 +19,10 @@ UNCOMPRESS="pigz -dc"
 PKGSUF="pkg.tzz"
 TAR="pax -x ustar -w"
 UNTAR="pax -x ustar -r"
+
+##
+BZ2="bzip2 -dc"
+GZ="pigz -dc"
+LZ="true"
+XZ="true"
+ZZ="pigz -dc"
