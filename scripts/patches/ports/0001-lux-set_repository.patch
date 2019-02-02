@@ -1,5 +1,5 @@
 diff --git a/inc/config.h b/inc/config.h
-index 9f82c66..2dca015 100644
+index 920b6c6..c3c57f8 100644
 --- a/inc/config.h
 +++ b/inc/config.h
 @@ -3,8 +3,8 @@
@@ -14,19 +14,19 @@ index 9f82c66..2dca015 100644
  #define PKG_FMT ".pkg.tzz"
  #define PKG_SIG ".sig"
 diff --git a/src/lux.c b/src/lux.c
-index 54c442c..252a255 100644
+index c72d7a2..12bac11 100644
 --- a/src/lux.c
 +++ b/src/lux.c
-@@ -204,7 +204,7 @@ fetch(Package *pkg)
+@@ -203,6 +203,8 @@ fetch(Package *pkg)
+ 			goto failure;
  		}
  
- 		tmp.n -= membuf_vstrcat(&tmp, PKG_SRC,
--		         pkg->name, "#", pkg->version);
-+		         pkg->name, "#", pkg->version, "/download");
++		membuf_strcats(&tmp, "/download");
++
  		if (netfd(tmp.p, fd[i], NULL) < 0)
  			goto failure;
- 	}
-@@ -358,7 +358,7 @@ update(void)
+ 
+@@ -358,7 +360,7 @@ update(void)
  		goto failure;
  	}
  
