@@ -5,7 +5,7 @@ license=CUSTOM
 description=A persistent process supervisor and service managment framework for un*x.
 
 [mirrors]
-git://github.com/eadwardus/perp
+git://github.com/eadwardus/perp.git
 
 [mdeps]
 libc

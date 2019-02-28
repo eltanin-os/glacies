@@ -8,7 +8,7 @@ description=A simple package manager.
 0001-lux-set_repository.patch
 
 [mirrors]
-git://github.com/eltanin-os/lux
+git://github.com/eltanin-os/lux.git
 
 [mdeps]
 libc
@@ -16,7 +16,7 @@ libressl
 libz
 
 [build]
-portsys_mk_meth make
+portsys_mk_meth make replace
 portsys_mk_exec
 
 [install]

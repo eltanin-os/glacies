@@ -5,7 +5,7 @@ license=MIT
 description=A suckless dhcp client.
 
 [mirrors]
-git://git.2f30.org/sdhcp
+git://git.2f30.org/sdhcp.git
 
 [mdeps]
 libc

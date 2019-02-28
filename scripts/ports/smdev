@@ -5,7 +5,7 @@ license=MIT
 description=A mostly mdev-compatible suckless program to manage device nodes.
 
 [mirrors]
-git://git.suckless.org/smdev
+git://git.suckless.org/smdev.git
 
 [mdeps]
 libc

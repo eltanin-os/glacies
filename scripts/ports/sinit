@@ -5,7 +5,7 @@ license=MIT
 description=A suckless init.
 
 [mirrors]
-git://git.suckless.org/sinit
+git://git.suckless.org/sinit.git
 
 [mdeps]
 libc

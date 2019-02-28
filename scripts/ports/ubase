@@ -8,7 +8,7 @@ description=A collection of unportable tools.
 0001-ubase-remove_duplicated.patch
 
 [mirrors]
-git://git.suckless.org/ubase
+git://git.suckless.org/ubase.git
 
 [mdeps]
 libc

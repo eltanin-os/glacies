@@ -9,7 +9,7 @@ description=A set of utilities for Linux networking.
 0002-iproute2-new_reduced_makefile.patch
 
 [mirrors]
-git://git.kernel.org/pub/scm/network/iproute2/iproute2
+git://git.kernel.org/pub/scm/network/iproute2/iproute2.git
 
 [mdeps]
 libc
