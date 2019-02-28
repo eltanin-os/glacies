@@ -11,16 +11,9 @@ git://github.com/eadwardus/perp
 libc
 
 [build]
-cat <<-EOF > conf.mk
-CC=$CC
-CFLAGS=$CFLAGS $CPPFLAGS
-LDFLAGS=$LDFLAGS
-STRIP=$STRIP
-BINDIR=$BINDIR
-SBINDIR=$BINDIR
-MANDIR=$MANDIR
-EOF
-make
+CFLAGS=($CFLAGS $CPPFLAGS)
+portsys_mk_meth make
+portsys_mk_exec
 
 [install]
-make DESTDIR=$DESTDIR install
+portsys_mk_exec install

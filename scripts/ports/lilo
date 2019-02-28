@@ -12,27 +12,32 @@ cksum=4437cae21345f483194a5dc95f686f3f3cb2beec78faae3fba959db25eae29fe2c56732e05
 0004-lilo-avoid_real_environment.patch
 
 [mirrors]
-http://ftp.debian.org/debian/pool/main/l/lilo/lilo_${version}.orig.tar.gz
+http://ftp.debian.org/debian/pool/main/l/lilo/lilo_$version.orig.tar.gz
 
 [mdeps]
 libc
 
 [build]
-for i in Makefile src/Makefile; do
-sed -e 's/CPP=$(CC)/CPP=$(CC) $(CFLAGS)/g'\
+portsys_hlp_sed Makefile\
+    -e 's/CPP=$(CC)/CPP=$(CC) $(CFLAGS)/g'\
     -e 's|^\tmake|\t$(MAKE)|g'\
     -e '/images install/d'\
     -e '/images all/d'\
-    -e '/CC=/d' $i > ${i}~
-mv ${i}~ $i
-done
-sed -e "s|MAN_DIR=.*|MAN_DIR=$MANDIR|g"\
-    -e "s|SBIN_DIR=.*|SBIN_DIR=$BINDIR|g"\
-    -e "s|CFG_DIR=.*|CFG_DIR=$ETCDIR|g"\
-    -e "s|BOOT_DIR=.*|BOOT_DIR=$BINDIR|g"\
-    -e "s|USRSBIN_DIR=.*|USRSBIN_DIR=$BINDIR|g" make.vars > make.vars~
-mv make.vars~ make.vars
-${PORTS}/mk/portsys_mk_make.sh LC_ALL=C
+    -e '/CC=/d'
+portsys_hlp_sed src/Makefile\
+    -e 's/CPP=$(CC)/CPP=$(CC) $(CFLAGS)/g'\
+    -e 's|^\tmake|\t$(MAKE)|g'\
+    -e '/images install/d'\
+    -e '/images all/d'\
+    -e '/CC=/d'
+portsys_hlp_sed make.vars\
+    -e 's|MAN_DIR=.*|MAN_DIR='$"MANDIR'|g'\
+    -e 's|SBIN_DIR=.*|SBIN_DIR='$"BINDIR'|g'\
+    -e 's|CFG_DIR=.*|CFG_DIR='$"ETCDIR'|g'\
+    -e 's|BOOT_DIR=.*|BOOT_DIR='$"BINDIR'|g'\
+    -e 's|USRSBIN_DIR=.*|USRSBIN_DIR='$"BINDIR'|g'
+portsys_mk_meth make replace
+portsys_mk_exec
 
 [install]
-${PORTS}/mk/portsys_mk_make.sh install
+portsys_mk_exec install

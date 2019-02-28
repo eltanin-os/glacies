@@ -15,7 +15,8 @@ git://git.kernel.org/pub/scm/network/iproute2/iproute2
 libc
 
 [build]
-${PORTS}/mk/portsys_mk_make.sh
+portsys_mk_meth make
+portsys_mk_exec
 
 [install]
-${PORTS}/mk/portsys_mk_make.sh PREFIX="$PREFIX" MANPREFIX="$MANDIR" install
+portsys_mk_exec install

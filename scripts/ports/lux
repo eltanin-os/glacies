@@ -16,8 +16,9 @@ libressl
 libz
 
 [build]
-${PORTS}/mk/portsys_mk_make.sh
+portsys_mk_meth make
+portsys_mk_exec
 
 [install]
-${PORTS}/mk/portsys_mk_make.sh install
-${PORTS}/mk/portsys_mk_make.sh install-man
+portsys_mk_exec install
+portsys_mk_exec install-man
