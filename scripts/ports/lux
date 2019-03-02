@@ -5,7 +5,7 @@ license=UNLICENSE
 description=A simple package manager.
 
 [patches]
-0001-lux-set_repository.patch
+lux-set_repository.patch
 
 [mirrors]
 git://github.com/eltanin-os/lux.git

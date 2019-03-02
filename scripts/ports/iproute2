@@ -5,8 +5,8 @@ license=GPL-2
 description=A set of utilities for Linux networking.
 
 [patches]
-0001-iproute2-fix_includes_for_musl_libc.patch
-0002-iproute2-new_reduced_makefile.patch
+iproute2-fix_includes_for_musl_libc.patch
+iproute2-new_reduced_makefile.patch
 
 [mirrors]
 git://git.kernel.org/pub/scm/network/iproute2/iproute2.git

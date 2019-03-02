@@ -5,11 +5,11 @@ index 920b6c6..c3c57f8 100644
 @@ -3,8 +3,8 @@
  #define PKG_RDB "/var/pkg/remote/"
  #define PKG_TMP "/var/pkg/cache/"
- 
+
 -#define PKG_SRC "url"
 -#define PKG_SDB "url"
-+#define PKG_SRC "https://sourceforge.net/projects/eltanin-os/files/repository/glacies/x86_64/"
-+#define PKG_SDB "https://sourceforge.net/projects/eltanin-os/files/repository/glacies/"
++#define PKG_SRC "http://sourceforge.net/projects/eltanin-os/files/repository/glacies/x86_64/"
++#define PKG_SDB "http://sourceforge.net/projects/eltanin-os/files/repository/glacies/"
  #define PKG_FDB "remote.db"
  #define PKG_FMT ".pkg.tzz"
  #define PKG_SIG ".sig"
@@ -20,18 +20,18 @@ index c72d7a2..12bac11 100644
 @@ -203,6 +203,8 @@ fetch(Package *pkg)
  			goto failure;
  		}
- 
+
 +		membuf_strcats(&tmp, "/download");
 +
  		if (netfd(tmp.p, fd[i], NULL) < 0)
  			goto failure;
- 
+
 @@ -358,7 +360,7 @@ update(void)
  		goto failure;
  	}
- 
+
 -	p.n -= membuf_vstrcat(&p, PKG_SDB, PKG_FDB);
 +	p.n -= membuf_vstrcat(&p, PKG_SDB, PKG_FDB, "/download");
- 
+
  	if (netfd(p.p, fd[0], NULL) < 0)
  		goto failure;

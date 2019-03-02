@@ -11,8 +11,7 @@ git://github.com/eadwardus/perp.git
 libc
 
 [build]
-CFLAGS=($CFLAGS $CPPFLAGS)
-portsys_mk_meth make
+portsys_mk_meth make nocppflags
 portsys_mk_exec
 
 [install]
