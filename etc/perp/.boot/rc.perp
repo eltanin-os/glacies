@@ -1,2 +1,2 @@
-#!/bin/sh
+#!/bin/rc
 exec perpd $PERP_BASE

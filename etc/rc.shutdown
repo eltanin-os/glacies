@@ -1,12 +1,10 @@
-#!/bin/sh
+#!/bin/rc
 
-case "$1" in
-"poweroff")
-	arg="-p"
-	;;
-"reboot")
-	arg="-r"
-	;;
-esac
+switch ($1) {
+case 'poweroff'
+	arg='-p'
+case 'reboot'
+	arg='-r'
+}
 
 exec /usr/libexec/shutdown $arg

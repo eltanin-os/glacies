@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/rc
 
 mount -t devtmpfs dev /dev -o nosuid,mode=755
 
@@ -13,7 +13,7 @@ printf "/bin/smdev\n" > /proc/sys/kernel/hotplugdone
 mount -o remount,rw /
 mount -a
 
-hostname $(cat /etc/hostname)
+hostname `{cat /etc/hostname}
 ip link set lo up
 dmesg >/var/log/dmesg.log
 

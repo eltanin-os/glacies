@@ -1,18 +1,15 @@
-#!/bin/sh
+#!/bin/rc
 #
 
-do_disable_overcommit=1
-do_protected_symlinks=0
-do_protected_hardlinks=1
+do_disable_overcommit=true
+do_protected_symlinks=false
+do_protected_hardlinks=true
 
-if $do_disable_overcommit ; then
-	printf "%s\n" 2 > /proc/sys/vm/overcommit_memory
-fi
+if ($do_disable_overcommit)
+	printf '%s\n' 2 > /proc/sys/vm/overcommit_memory
 
-if $do_protected_symlinks ; then
-	printf "%s\n" 1 > /proc/sys/fs/protected_symlinks
-fi
+if ($do_protected_symlinks)
+	printf '%s\n' 1 > /proc/sys/fs/protected_symlinks
 
-if $do_protected_hardlinks ; then
-	printf "%s\n" 1 > /proc/sys/fs/protected_hardlinks
-fi
+if ($do_protected_hardlinks)
+	printf '%s\n' 1 > /proc/sys/fs/protected_hardlinks

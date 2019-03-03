@@ -1,0 +1,45 @@
+#!/bin/rc -e
+# Environment:
+# * DIRPKGS
+# *
+
+DIRPKGS=$"TOOLDIR/tmp/packages
+DIRDB=$"TOOLDIR/tmp/database
+REPOSITORY=''
+
+# ports do not handle dependencies,
+# keep the libraries first and then sort(1)
+PACKAGES=`{cat <<EOF
+ncurses
+libedit
+libnl-tiny
+libressl
+libz
+bzip2
+cbase
+curl
+iproute2
+lilo
+lux
+m4
+make
+mandoc
+mksh
+perp
+pigz
+pkgconf
+rc
+sdhcp
+sinit
+smdev
+ubase
+utilchest
+wpa_supplicant
+EOF
+}
+
+fn bsys_mk_pkgs {
+	PORTSYS_PKG_DESTDIR=$DIRPKGS\
+	PORTSYS_DB_DESTDIR=$DIRDB\
+	./mk/portsys.rc opackage $PACKAGES
+}
