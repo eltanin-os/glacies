@@ -97,7 +97,7 @@ if ([ -e .phase1 ]) {
 
 	# prepare environment
 	cp -R $"TOOLDIR/etc .
-	ln -s lksh bin/sh
+	ln -s dash bin/sh
 	git clone $"RPORTS
 
 	# prepare the environment to chroot

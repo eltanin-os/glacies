@@ -18,13 +18,13 @@ libz
 bzip2
 cbase
 curl
+dash
 iproute2
 lilo
 lux
 m4
 make
 mandoc
-mksh
 perp
 pigz
 pkgconf
