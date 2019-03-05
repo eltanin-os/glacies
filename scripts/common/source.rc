@@ -16,6 +16,7 @@ libnl-tiny
 libressl
 libz
 bzip2
+ca-certificates
 cbase
 curl
 dash

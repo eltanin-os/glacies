@@ -1,0 +1,20 @@
+[vars]
+name=ca-certificates
+version=20190305
+license=GPL-2+ MPL-2
+description=Common CA certificates for SSL/TLS.
+cksum=a4c11c00cb77cd29e401318b8ea7a5a9d39fc8092e39dc5068aee8d61faf1d6cb7f41904cc6375fd519fe04d7a4a5faf63f86437f10cfadacc76b335f08f2579
+
+[mirrors]
+http://sourceforge.net/projects/eltanin-os/files/mirrors/ca-certificates-$version.tar.gz/download
+
+[rdeps]
+libressl
+sh
+
+[build]
+portsys_mk_meth make
+portsys_mk_exec
+
+[install]
+portsys_mk_exec install
