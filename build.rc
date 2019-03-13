@@ -59,6 +59,7 @@ if (![ -e .phase1 ]) {
 
 	touch  .phase1
 	bsys_io_msg execute the script again with root permission
+	exit
 }
 #if not {
 if ([ -e .phase1 ]) {
@@ -113,6 +114,7 @@ if ([ -e .phase1 ]) {
 lux -N explode  $PKGL
 lux -N add      $PKGL
 lux -N register $PKGL
+update-ca-certificates --fresh
 lux update
 lux fetch    $PKGR
 lux explode  $PKGR
