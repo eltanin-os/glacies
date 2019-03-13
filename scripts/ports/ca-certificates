@@ -3,7 +3,7 @@ name=ca-certificates
 version=20190305
 license=GPL-2+ MPL-2
 description=Common CA certificates for SSL/TLS.
-cksum=a4c11c00cb77cd29e401318b8ea7a5a9d39fc8092e39dc5068aee8d61faf1d6cb7f41904cc6375fd519fe04d7a4a5faf63f86437f10cfadacc76b335f08f2579
+cksum=34878fe79ffaefd153ed00356a0c174cf012694f980eb503ed8a9b76009f59184ddd1d911d152b3dcc820c72e3eea822efdd6101bd73406db09f89a5dfa55f83
 
 [mirrors]
 http://sourceforge.net/projects/eltanin-os/files/mirrors/ca-certificates-$version.tar.gz/download
