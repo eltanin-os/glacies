@@ -1,6 +1,6 @@
 [vars]
 name=lux
-version=1.4
+version=1.5
 license=UNLICENSE
 description=A simple package manager.
 
@@ -16,6 +16,7 @@ libressl
 libz
 
 [build]
+CPPFLAGS=($CPPFLAGS -DWITH_SSL)
 portsys_mk_meth make replace
 portsys_mk_exec
 
