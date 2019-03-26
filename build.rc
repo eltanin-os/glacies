@@ -90,8 +90,9 @@ if ([ -e .phase1 ]) {
 	bsys_hlp_install rc
 
 	cp $"DIRPKGS/*  var/pkg/cache
-	mv $"DIRDB/libc var/pkg/local
+	cp $"DIRDB/libc var/pkg/local
 	cp $"DIRDB/*    var/pkg/tmp
+	rm /var/pkg/tmp/libc
 
 	@{ cd $"TOOLDIR/tmp
 	clr_mk_install }
