@@ -1,0 +1,42 @@
+# ONLY FOR TEST
+#!/bin/rc -e
+
+VER=2017-08-23
+URL=http://ellcc.org/releases/latest/ellcc-$"HOSTARCH-linux-$"VER.bz2
+
+fn clr_cc_path @{
+	cd ellcc
+	p=`{pwd}
+	printf $"p/bin/ecc
+}
+
+fn clr_cxx_path @{
+	cd ellcc
+	p=`{pwd}
+	printf $"p/bin/ecc++
+}
+
+fn clr_mk_prepare {
+	file=`{basename $"URL}
+	$FETCH $"URL
+	$BZ2 $"file | $UNTAR
+	@{ cd ellcc/libecc/lib/$"HOSTARCH-linux
+	rm libcares* libcurl* libcurses* \
+	libexpat* libform* libmbed*      \
+	libmenu* libmeta* libncurses*    \
+	libpanel* libssh* libterm*       \
+	libz* }
+}
+
+fn clr_mk_build @{
+	cd database
+	printf 'version:git-a08910fc2cc739f631b75b2d09b8d72a0d64d285' > libc
+}
+
+fn clr_mk_install @{
+	cd ellcc
+	mkdir -p $"ROOTDIR/opt/ellcc
+	cp -R bin lib libecc $"ROOTDIR/opt/ellcc
+	ln -s ../opt/ellcc/bin/ecc   $"ROOTDIR/bin/cc
+	ln -s ../opt/ellcc/bin/ecc++ $"ROOTDIR/bin/c++
+}
