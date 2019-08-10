@@ -18,7 +18,8 @@ fn clr_cxx_path @{
 
 fn clr_mk_prepare {
 	file=`{basename $"URL}
-	$FETCH $"URL
+	if ([ -n $"CACHEDIR ]) file=$"CACHEDIR/$"file
+	if (![ -f $"file ]) $FETCH $"URL
 	$BZ2 $"file | $UNTAR
 	@{ cd ellcc/libecc/lib/$"HOSTARCH-linux
 	rm libcares* libcurl* libcurses* \

@@ -5,6 +5,7 @@ HOSTARCH=x86_64
 ARCH=x86_64
 COMPILER=ellcc
 ROOTDIR=/mnt/glacies
+CACHEDIR=''
 
 ##
 RPORTS=git://github.com/eltanin-os/ports

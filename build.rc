@@ -92,7 +92,7 @@ if ([ -e .phase1 ]) {
 	cp $"DIRPKGS/*  var/pkg/cache
 	cp $"DIRDB/libc var/pkg/local
 	cp $"DIRDB/*    var/pkg/tmp
-	rm /var/pkg/tmp/libc
+	rm var/pkg/tmp/libc
 
 	@{ cd $"TOOLDIR/tmp
 	clr_mk_install }

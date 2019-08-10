@@ -40,7 +40,9 @@ EOF
 }
 
 fn bsys_mk_pkgs {
+	CACHEOPTS=()
+	if ([ -d $"CACHEDIR ]) CACHEOPTS=(-d $"CACHEDIR)
 	PORTSYS_PKG_DESTDIR=$DIRPKGS\
 	PORTSYS_DB_DESTDIR=$DIRDB\
-	./mk/portsys.rc opackage $PACKAGES
+	./mk/portsys.rc package $CACHEOPTS -l $PACKAGES
 }
