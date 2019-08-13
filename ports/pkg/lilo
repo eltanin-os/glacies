@@ -6,10 +6,8 @@ description=The classic OS boot loader.
 cksum=4437cae21345f483194a5dc95f686f3f3cb2beec78faae3fba959db25eae29fe2c56732e055c05f1d101682c5d442cdc9561fae8074f61f5537dde0413204c54
 
 [patches]
-lilo-remove__GLIBC__.patch
-lilo-remove_dynamic_initialization_from_constant_declaration.patch
-lilo-remove_gcc_checkit.patch
-lilo-avoid_real_environment.patch
+lilo-compat_build.patch
+lilo-fix_dyn_init.patch
 
 [mirrors]
 http://ftp.debian.org/debian/pool/main/l/lilo/lilo_$version.orig.tar.gz
