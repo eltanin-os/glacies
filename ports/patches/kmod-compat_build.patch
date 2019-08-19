@@ -1,0 +1,252 @@
+diff -Naur a/libkmod/libkmod-internal.h b/libkmod/libkmod-internal.h
+--- a/libkmod/libkmod-internal.h	2019-02-04 20:03:17.867038004 -0200
++++ b/libkmod/libkmod-internal.h	2019-08-11 10:21:58.109724414 -0300
+@@ -2,6 +2,7 @@
+ 
+ #include <stdbool.h>
+ #include <stdio.h>
++#include <stdlib.h>
+ #include <syslog.h>
+ #include <limits.h>
+ 
+@@ -37,14 +38,7 @@
+ 
+ #define KCMD_LINE_SIZE 4096
+ 
+-#ifndef HAVE_SECURE_GETENV
+-#  ifdef HAVE___SECURE_GETENV
+-#    define secure_getenv __secure_getenv
+-#  else
+-#    warning neither secure_getenv nor __secure_getenv is available
+-#    define secure_getenv getenv
+-#  endif
+-#endif
++#define secure_getenv(x) getenv(x)
+ 
+ void kmod_log(const struct kmod_ctx *ctx,
+ 		int priority, const char *file, int line, const char *fn,
+diff -Naur a/Makefile b/Makefile
+--- a/Makefile	1969-12-31 21:00:00.000000000 -0300
++++ b/Makefile	2019-08-11 10:23:11.097727123 -0300
+@@ -0,0 +1,115 @@
++#include config.mk
++
++.SUFFIXES:
++.SUFFIXES: .o .c
++
++INC= -I .
++HDR=\
++	libkmod/libkmod.h\
++	libkmod/libkmod-index.h\
++	libkmod/libkmod-internal.h\
++	shared/array.h\
++	shared/hash.h\
++	shared/macro.h\
++	shared/missing.h\
++	shared/scratchbuf.h\
++	shared/strbuf.h\
++	shared/util.h\
++	tools/kmod.h\
++	tools/log.h
++
++# BIN
++KMODSRC=\
++	tools/depmod.c\
++	tools/insert.c\
++	tools/insmod.c\
++	tools/kmod.c\
++	tools/log.c\
++	tools/lsmod.c\
++	tools/modinfo.c\
++	tools/modprobe.c\
++	tools/remove.c\
++	tools/rmmod.c\
++	tools/static-nodes.c
++
++KMODOBJ=$(KMODSRC:.c=.o)
++
++# MAN
++MAN5=\
++	man/depmod.d.5\
++	man/modprobe.d.5\
++	man/modules.dep.5\
++	man/modules.dep.bin.5
++
++MAN8=\
++	man/kmod.8\
++	man/depmod.8\
++	man/modprobe.8\
++	man/modinfo.8
++
++# LIB SRC
++LIBKMODSRC=\
++	libkmod/libkmod.c\
++	libkmod/libkmod-config.c\
++	libkmod/libkmod-elf.c\
++	libkmod/libkmod-file.c\
++	libkmod/libkmod-index.c\
++	libkmod/libkmod-list.c\
++	libkmod/libkmod-module.c\
++	libkmod/libkmod-signature.c\
++	shared/array.c\
++	shared/hash.c\
++	shared/scratchbuf.c\
++	shared/strbuf.c\
++	shared/util.c
++
++# LIB PATH
++LIBKMOD=libkmod/libkmod.a
++
++# LIB OBJS
++LIBKMODOBJ=$(LIBKMODSRC:.c=.o)
++
++# ALL
++LIB= $(LIBKMOD)
++OBJ= $(KMODSRC:.c=.o) $(LIBKMODOBJ)
++SRC= $(KMODSRC)
++
++# VAR RULES
++all: $(LIB) tools/kmod
++$(OBJ): $(HDR)
++
++# SUFFIX RULES
++.o:
++	$(CC) $(LDFLAGS) -o $@ $< $(LIB) $(LDLIBS)
++
++.c.o:
++	$(CC) $(CFLAGS) $(CPPFLAGS) $(INC) -o $@ -c $<
++
++# BINARIES RULES
++tools/kmod: $(KMODOBJ) $(LIB)
++	$(CC) $(LDFLAGS) -o tools/kmod $(KMODOBJ) $(LIB) $(LDLIBS)
++
++# LIBRARIES RULES
++$(LIBKMOD): $(LIBKMODOBJ)
++	$(AR) rc $@ $(LIBKMODOBJ)
++	$(RANLIB) $@
++
++# USER ACTIONS
++install:
++	install -dm 755 $(DESTDIR)/$(BINDIR)
++	install -dm 755 $(DESTDIR)/$(LIBDIR)
++	install -dm 755 $(DESTDIR)/$(INCDIR)
++	install -dm 755 $(DESTDIR)/$(MANDIR)/man5
++	install -dm 755 $(DESTDIR)/$(MANDIR)/man8
++	install -cm 755 tools/kmod $(DESTDIR)/$(BINDIR)
++	for f in depmod modinfo modprobe; do ln -s kmod $(DESTDIR)/$(BINDIR)/$$f; done
++	install -cm 644 $(LIBKMOD) $(DESTDIR)/$(LIBDIR)
++	install -cm 644 libkmod/libkmod.h $(DESTDIR)/$(INCDIR)
++	install -cm 644 $(MAN5) $(DESTDIR)/$(MANDIR)/man5
++	install -cm 644 $(MAN8) $(DESTDIR)/$(MANDIR)/man8
++
++clean:
++	rm -f $(BIN) $(OBJ) $(LIB)
++
++.PHONY:
++	all install clean
+diff -Naur a/shared/missing.h b/shared/missing.h
+--- a/shared/missing.h	2014-12-25 23:28:51.712629340 -0200
++++ b/shared/missing.h	2019-08-11 10:21:58.113724415 -0300
+@@ -1,27 +1,18 @@
+ #pragma once
+ 
++#include <errno.h>
++#include <string.h>
+ #include <unistd.h>
+ #include <sys/syscall.h>
+ 
+-#ifdef HAVE_LINUX_MODULE_H
+-#include <linux/module.h>
+-#endif
+-
+-#ifndef MODULE_INIT_IGNORE_MODVERSIONS
+-# define MODULE_INIT_IGNORE_MODVERSIONS 1
+-#endif
+-
+-#ifndef MODULE_INIT_IGNORE_VERMAGIC
+-# define MODULE_INIT_IGNORE_VERMAGIC 2
+-#endif
++#define MODULE_INIT_IGNORE_MODVERSIONS 1
++#define MODULE_INIT_IGNORE_VERMAGIC    2
+ 
+ #ifndef __NR_finit_module
+ # define __NR_finit_module -1
+ #endif
+ 
+-#ifndef HAVE_FINIT_MODULE
+-#include <errno.h>
+-
++#undef finit_module
+ static inline int finit_module(int fd, const char *uargs, int flags)
+ {
+ 	if (__NR_finit_module == -1) {
+@@ -31,25 +22,10 @@
+ 
+ 	return syscall(__NR_finit_module, fd, uargs, flags);
+ }
+-#endif
+-
+-#if !HAVE_DECL_STRNDUPA
+-#define strndupa(s, n)							\
+-	({								\
+-		const char *__old = (s);				\
+-		size_t __len = strnlen(__old, (n));			\
+-		char *__new = alloca(__len + 1);			\
+-		__new[__len] = '\0';					\
+-		memcpy(__new, __old, __len);				\
+-	 })
+-#endif
+ 
+-#if !HAVE_DECL_BE32TOH
+-#include <endian.h>
+-#include <byteswap.h>
+-#if __BYTE_ORDER == __LITTLE_ENDIAN
+-#define be32toh(x) bswap_32 (x)
+-#else
+-#define be32toh(x) (x)
+-#endif
+-#endif
++#undef strndupa
++static inline char * strndupa(const char *v, size_t n)
++{
++	n = strnlen(v, n);
++	return memcpy(alloca(n+1), v, n);
++}
+diff -Naur a/tools/kmod.c b/tools/kmod.c
+--- a/tools/kmod.c	2018-01-31 15:10:59.598903840 -0200
++++ b/tools/kmod.c	2019-08-11 10:21:58.113724415 -0300
+@@ -58,6 +58,8 @@
+ 	&kmod_cmd_compat_depmod,
+ };
+ 
++const char *__argv0;
++
+ static int kmod_help(int argc, char *argv[])
+ {
+ 	size_t i;
+@@ -170,6 +172,8 @@
+ {
+ 	int err;
+ 
++	__argv0 = basename(argv[0]);
++
+ 	if (streq(program_invocation_short_name, "kmod"))
+ 		err = handle_kmod_commands(argc, argv);
+ 	else
+diff -Naur a/tools/kmod.h b/tools/kmod.h
+--- a/tools/kmod.h	2018-01-31 15:10:59.599903844 -0200
++++ b/tools/kmod.h	2019-08-11 10:21:58.113724415 -0300
+@@ -27,6 +27,13 @@
+ 	const char *help;
+ };
+ 
++/* compat */
++#define PACKAGE "kmod"
++#define VERSION "26"
++#define KMOD_FEATURES "-ZLIB"
++#define program_invocation_short_name __argv0
++extern const char *__argv0;
++
+ extern const struct kmod_cmd kmod_cmd_compat_lsmod;
+ extern const struct kmod_cmd kmod_cmd_compat_rmmod;
+ extern const struct kmod_cmd kmod_cmd_compat_insmod;

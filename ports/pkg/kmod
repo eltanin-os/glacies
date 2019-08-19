@@ -1,0 +1,25 @@
+[vars]
+name=kmod
+version=26
+license=GPL-2
+description=Linux kernel module handling
+cksum=c62ed936387c74c23b8d66e81ee96f0eca75639c6bf7643e35e2b265fe45dfaca32b5fb47d56820f9e3f617bb666b7dd39ae064fad30a5292db3dae48a842193
+
+[patches]
+kmod-compat_build.patch
+
+[mirrors]
+http://mirrors.edge.kernel.org/pub/linux/utils/kernel/kmod/kmod-$version.tar.gz
+
+[mdeps]
+libc
+libz
+
+[build]
+CFLAGS=($CFLAGS -DSYSCONFDIR=\"$ETCDIR\" -DENABLE_ZLIB)
+LDLIBS=(-lz)
+portsys_mk_meth make
+portsys_mk_exec
+
+[install]
+portsys_mk_exec install

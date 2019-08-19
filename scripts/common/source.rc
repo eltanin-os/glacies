@@ -21,6 +21,7 @@ cbase
 curl
 dash
 iproute2
+kmod
 lilo
 lux
 m4
