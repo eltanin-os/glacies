@@ -43,8 +43,7 @@ if (![ -e .phase1 ]) {
 	CXX=`{clr_cxx_path}
 	git clone $"RPORTS
 	cd ports
-	cp $"TOOLDIR/scripts/ports/*         pkg
-	cp $"TOOLDIR/scripts/patches/ports/* patches
+	cp -R $"TOOLDIR/ports/* .
 	PORTS=`{pwd}
 	sed -e 's|^CC=.*|CC='$"CC'|g'                                    \
 	    -e 's|^CXX=.*|CXX='$"CXX'|g'                                 \
@@ -70,7 +69,7 @@ if ([ -e .phase1 ]) {
 
 	# generate directories
 	mkdir bin boot dev etc home include lib libexec\
-	      media mnt opt proc share src srv sys var
+	      media mnt opt proc share run src srv sys var
 	mkdir -m 0750 root
 	mkdir -m 1777 tmp
 	ln -s .   usr
@@ -92,6 +91,7 @@ if ([ -e .phase1 ]) {
 	cp $"DIRPKGS/*  var/pkg/cache
 	cp $"DIRDB/libc var/pkg/local
 	cp $"DIRDB/*    var/pkg/tmp
+	cp $"TOOLDIR/scripts/bin/* bin
 	rm var/pkg/tmp/libc
 
 	@{ cd $"TOOLDIR/tmp

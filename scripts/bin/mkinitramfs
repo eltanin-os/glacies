@@ -1,0 +1,71 @@
+#!/bin/rc -e
+
+argv0=$0
+
+fn usage {
+	printf 'usage: %s [version]\n' argv0 >[1=2]
+	exit 1
+}
+
+fn sigexit {
+	rm -Rf $"tmpdir
+}
+
+fn fhbuild @{
+	cd $"1
+	mkdir -p etc bin dev lib/firmware run sys proc
+	ln -s . usr
+	ln -s bin sbin
+}
+
+fn filesbuild @{
+	cd $"1
+	cp /etc/modules etc
+	bins=(kmod utilchest test ubase-box rc)
+	for (f in $bins) cp /bin/$"f bin
+	ln -s test bin/[
+	for (f in `{utilchest}) ln -s utilchest bin/$"f
+	for (f in `{ubase-box}) ln -s ubase-box bin/$"f
+	kbins=(depmod modinfo modprobe)
+	for (f in $kbins) ln -s kmod bin/$"f
+}
+
+fn modbuild @{
+	cd $"1
+	find /lib/modules/$"kversion/kernel/crypto             \
+	    /lib/modules/$"kversion/kernel/fs                  \
+	    /lib/modules/$"kversion/kernel/lib                 \
+	    /lib/modules/$"kversion/kernel/drivers/block       \
+	    /lib/modules/$"kversion/kernel/drivers/ata         \
+	    /lib/modules/$"kversion/kernel/drivers/md          \
+	    /lib/modules/$"kversion/kernel/drivers/firewire    \
+	    /lib/modules/$"kversion/kernel/drivers/usb/host    \
+	    /lib/modules/$"kversion/kernel/drivers/usb/storage \
+	    /lib/modules/$"kversion/kernel/drivers/scsi        \
+	    -type f >[2]/dev/null | cpio -dp .
+	cp /lib/modules/$"kversion/modules.builtin lib/modules/$"kversion
+	cp /lib/modules/$"kversion/modules.order lib/modules/$"kversion
+	depmod -b . $"kversion
+}
+
+fn initbuild @{
+	cd $"1
+	install -m 0755 /etc/init.in $"tmpdir/init
+	find . | cpio -H newc -o | pigz -9
+}
+
+if (test $#* -gt 1) usage
+kversion=$"1
+if (~ $"kversion) kversion=`{uname -r}
+
+if (![ -d /lib/modules/$"kversion ]) {
+	printf '%s: <error> no module directory named %s\n' \
+	    $argv0 $"kversion >[1=2]
+	exit 1
+}
+
+tmpdir=`{mktemp -d}
+fhbuild    $tmpdir
+filesbuild $tmpdir
+modbuild   $tmpdir
+initbuild  $tmpdir > /boot/initramfs-$"kversion
