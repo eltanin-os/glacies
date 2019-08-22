@@ -6,10 +6,6 @@ mkdir /dev/pts
 mkdir /dev/shm
 
 mount -t proc none /proc
-
-smdev -s
-printf "/bin/smdev\n" > /proc/sys/kernel/hotplugdone
-
 mount -o remount,rw /
 mount -a
 
