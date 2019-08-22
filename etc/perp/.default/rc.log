@@ -1,13 +1,13 @@
 #!/bin/rc
 
-if (~ $"1 start ) exit
+if (~ $#* 0) *=(start perpd)
+if (! ~ $"1 start ) exit
 
-logdir=/var/log/perpd
+logdir=/var/log/$"2
 
-if (![ -d $"logdir ]) {
-	mkdir "$logdir"
-	chown -R log:log $logdir
-	chmod 0755 $logdir
+if (![ -d $logdir ]) {
+	mkdir $logdir
+	chown log:log $logdir
 }
 
 exec runuid log tinylog -k 8 -s 100000 -t -z $logdir
