@@ -7,14 +7,15 @@ DIRPKGS=$"TOOLDIR/tmp/packages
 DIRDB=$"TOOLDIR/tmp/database
 REPOSITORY=''
 
-# ports do not handle dependencies,
-# keep the libraries first and then sort(1)
-PACKAGES=`{cat <<EOF
+fn packages {
+cat <<EOF
+[deps]
 ncurses
 libedit
 libnl-tiny
 libressl
 libz
+[all]
 bzip2
 ca-certificates
 cbase
@@ -42,7 +43,10 @@ EOF
 fn bsys_mk_pkgs {
 	CACHEOPTS=()
 	if ([ -d $"CACHEDIR ]) CACHEOPTS=(-d $"CACHEDIR)
-	PORTSYS_PKG_DESTDIR=$DIRPKGS\
-	PORTSYS_DB_DESTDIR=$DIRDB\
-	./mk/portsys.rc package $CACHEOPTS -l $PACKAGES
+	PORTSYS_PKGDESTDIR=$DIRPKGS
+	PORTSYS_DBDESTDIR=$DIRDB
+	tmpfile=`{mktemp}
+	packages >$tmpfile
+	./mk/portsys.rc package $CACHEOPTS -L -f $tmpfile
+	rm $tmpfile
 }

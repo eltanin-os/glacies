@@ -3,7 +3,7 @@
 argv0=$0
 
 fn usage {
-	printf 'usage: %s [version]\n' argv0 >[1=2]
+	printf 'usage: %s [version]\n' $argv0 >[1=2]
 	exit 1
 }
 
