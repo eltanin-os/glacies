@@ -91,16 +91,20 @@ if ([ -e .phase1 ]) {
 	cp $"DIRPKGS/*  var/pkg/cache
 	cp $"DIRDB/libc var/pkg/local
 	cp $"DIRDB/*    var/pkg/tmp
-	cp $"TOOLDIR/scripts/bin/* bin
 	rm var/pkg/tmp/libc
 
 	@{ cd $"TOOLDIR/tmp
 	clr_mk_install }
 
 	# prepare environment
+	cp -R $"TOOLDIR/scripts/bin .
 	cp -R $"TOOLDIR/etc .
 	ln -s dash bin/sh
 	git clone $"RPORTS
+
+	# set permissions
+	chmod +t   etc/perp/getty@*
+	chmod 0600 etc/shadow
 
 	# prepare the environment to chroot
 	mount -t proc none proc
@@ -121,5 +125,6 @@ lux fetch    $PKGR
 lux explode  $PKGR
 lux add      $PKGR
 lux register $PKGR
+mkinitramfs `{lux show-version linux-image}^-amd64
 EOF
 }
