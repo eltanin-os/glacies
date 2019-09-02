@@ -114,17 +114,18 @@ if ([ -e .phase1 ]) {
 
 	# use lux to install packages
 	PKGR=(linux-headers linux-image)
-	PKGL=(var/pkg/tmp/*)
+	PKGL=/^(var/pkg/tmp/*)
 	chroot . /bin/rc <<EOF
 lux -N explode  $PKGL
 lux -N add      $PKGL
 lux -N register $PKGL
 update-ca-certificates --fresh
-lux update
+lux populate-remote
+lux populate-chksum
 lux fetch    $PKGR
 lux explode  $PKGR
 lux add      $PKGR
 lux register $PKGR
-mkinitramfs `{lux show-version linux-image}^-amd64
+mkinitramfs `{lux show-version linux-image}^-gnu
 EOF
 }

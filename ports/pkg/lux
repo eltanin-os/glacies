@@ -1,6 +1,6 @@
 [vars]
 name=lux
-version=1.5
+version=2.1
 license=UNLICENSE
 description=A simple package manager.
 
