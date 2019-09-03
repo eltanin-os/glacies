@@ -23,8 +23,6 @@ if ([ -z $"CXX ]) CXX=c++
 
 bsys_chk_dep $COMPRESS(1) $FETCH(1) $TAR(1)
 bsys_chk_dep awk byacc fakeroot git make
-#lilo
-bsys_chk_dep as86 ld86
 
 if (![ -e .phase1 ]) {
 	@{ if (![ -d tmp ]) mkdir tmp
@@ -56,12 +54,11 @@ if (![ -e .phase1 ]) {
 	mv config.rc~ mk/config.rc
 	bsys_mk_pkgs || bsys_io_err failed to generate packages }
 
-	touch  .phase1
+	if (! ~ $status 0) exit $status
+	touch .phase1
 	bsys_io_msg execute the script again with root permission
 	exit
-}
-#if not {
-if ([ -e .phase1 ]) {
+}; if not {
 	argv0=`{whoami}
 	if (! ~ $"argv0 'root') bsys_io_err root permission are needed
 

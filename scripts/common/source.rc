@@ -23,7 +23,6 @@ curl
 dash
 iproute2
 kmod
-lilo
 lux
 m4
 make
