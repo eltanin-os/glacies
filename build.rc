@@ -110,19 +110,17 @@ if (![ -e .phase1 ]) {
 	cp /etc/resolv.conf etc
 
 	# use lux to install packages
-	PKGR=(linux-headers linux-image)
-	PKGL=/^(var/pkg/tmp/*)
-	chroot . /bin/rc <<EOF
-lux -N explode  $PKGL
-lux -N add      $PKGL
-lux -N register $PKGL
+	chroot . /bin/rc <<'EOF'
+lux -N explode  /var/pkg/tmp/*
+lux -N add      /var/pkg/tmp/*
+lux -N register /var/pkg/tmp/*
 update-ca-certificates --fresh
 lux populate-remote
 lux populate-chksum
-lux fetch    $PKGR
-lux explode  $PKGR
-lux add      $PKGR
-lux register $PKGR
+lux fetch    linux-image linux-headers
+lux explode  linux-image linux-headers
+lux add      linux-image linux-headers
+lux register linux-image linux-headers
 mkinitramfs `{lux show-version linux-image}^-gnu
 EOF
 }
