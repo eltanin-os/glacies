@@ -41,7 +41,6 @@ if (![ -e .phase1 ]) {
 	CXX=`{clr_cxx_path}
 	git clone $"RPORTS
 	cd ports
-	cp -R $"TOOLDIR/ports/* .
 	PORTS=`{pwd}
 	sed -e 's|^CC=.*|CC='$"CC'|g'                                    \
 	    -e 's|^CXX=.*|CXX='$"CXX'|g'                                 \
