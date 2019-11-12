@@ -1,0 +1,8 @@
+# name: glacies-scripts
+# version: 0.1
+# license: UNLICENSE
+# description: Eltanin Glacies helper scripts.
+# size: 8192
+files:
+	bin/sysfetch 4726757476 2624
+	bin/mkinitramfs 22270261261 3213
