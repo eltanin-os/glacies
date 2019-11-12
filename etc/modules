@@ -1,1 +1,4 @@
-
+scsi_mod
+sd_mod
+ata_generic
+ata_piix
