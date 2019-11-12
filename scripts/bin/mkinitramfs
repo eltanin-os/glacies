@@ -13,7 +13,7 @@ fn sigexit {
 
 fn fhbuild @{
 	cd $"1
-	mkdir -p etc bin dev lib/firmware run sys proc
+	mkdir -p etc/default bin dev lib/firmware run sys proc
 	ln -s . usr
 	ln -s bin sbin
 }
@@ -21,13 +21,9 @@ fn fhbuild @{
 fn filesbuild @{
 	cd $"1
 	cp /etc/modules etc
-	bins=(kmod utilchest test ubase-box rc)
-	for (f in $bins) cp /bin/$"f bin
-	ln -s test bin/[
-	for (f in `{utilchest}) ln -s utilchest bin/$"f
-	for (f in `{ubase-box}) ln -s ubase-box bin/$"f
-	kbins=(depmod modinfo modprobe)
-	for (f in $kbins) ln -s kmod bin/$"f
+	touch etc/fstab
+	files=`{venus -l files ccore ecore kmod rc ubase | tr ' ' '\n' | egrep -v 'man[0-9]|include'}
+	for (f in $files) cp /$f $f
 }
 
 fn modbuild @{
@@ -58,7 +54,7 @@ if (test $#* -gt 1) usage
 kversion=$"1
 if (~ $"kversion) kversion=`{uname -r}
 
-if (![ -d /lib/modules/$"kversion ]) {
+if (! test -d /lib/modules/$"kversion) {
 	printf '%s: <error> no module directory named %s\n' \
 	    $argv0 $"kversion >[1=2]
 	exit 1
