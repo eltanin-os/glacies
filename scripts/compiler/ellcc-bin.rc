@@ -18,8 +18,11 @@ fn clr_cxx_path @{
 
 fn clr_mk_prepare {
 	file=`{basename $"URL}
-	if ([ -n $"CACHEDIR ]) file=$"CACHEDIR/$"file
-	if (![ -f $"file ]) $FETCH $"URL
+	if (test -n $CACHEDIR) file=$"CACHEDIR/$"file
+	if (! test -f $"file) {
+		$FETCH $"URL
+		mv `{basename $"URL} $"file
+	}
 	$BZ2 $"file | $UNTAR
 	@{ cd ellcc/libecc/lib/$"HOSTARCH-linux
 	rm libcares* libcurl* libcurses* \
@@ -30,14 +33,15 @@ fn clr_mk_prepare {
 }
 
 fn clr_mk_build @{
-	cd database
-	printf 'version:git-a08910fc2cc739f631b75b2d09b8d72a0d64d285' > libc
+	tmp=`{mktemp}
+	printf '# version: a08910fc2cc739f631b75b2d09b8d72a0d64d285\n' > $tmp
+	$SU mv $tmp $ROOTDBDIR/libc
 }
 
 fn clr_mk_install @{
 	cd ellcc
-	mkdir -p $"ROOTDIR/opt/ellcc
-	cp -R bin lib libecc $"ROOTDIR/opt/ellcc
-	ln -s ../opt/ellcc/bin/ecc   $"ROOTDIR/bin/cc
-	ln -s ../opt/ellcc/bin/ecc++ $"ROOTDIR/bin/c++
+	$SU mkdir -p $"ROOTDIR/opt/ellcc
+	$SU cp -R bin lib libecc $"ROOTDIR/opt/ellcc
+	$SU ln -s ../opt/ellcc/bin/ecc   $"ROOTDIR/bin/cc
+	$SU ln -s ../opt/ellcc/bin/ecc++ $"ROOTDIR/bin/c++
 }
