@@ -8,9 +8,9 @@ ro=ro
 rootflags=''
 device=''
 
-mount -t proc none /proc
-mount -t sysfs none /sys
-mount -t devtmpfs none /dev
+mount -nt proc none /proc
+mount -nt sysfs none /sys
+mount -nt devtmpfs none /dev
 
 modules=`{cat /etc/modules}
 for (mod in $modules) modprobe $mod
@@ -50,7 +50,7 @@ case LABEL=*
 	device=/dev/disk/by-label/$"LABEL
 }
 
-mount -n -t $"rootfstype -o $"rootflags $"device /.root
+mount -nt $"rootfstype -o $"rootflags $"device /.root
 
 umount /proc
 umount /sys

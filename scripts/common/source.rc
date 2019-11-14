@@ -37,13 +37,13 @@ venus
 EOF
 }
 
-fn bsys_mk_pkgs {
+# $1: path
+fn bsys_mk_install {
 	CACHEOPTS=()
 	if ([ -d $"CACHEDIR ]) CACHEOPTS=(-d $"CACHEDIR)
-	PORTSYS_PKGDESTDIR=$DIRPKGS
-	PORTSYS_DBDESTDIR=$DIRDB
+	PORTSYS_SYSPATH=$1
 	tmpfile=`{mktemp}
 	packages >$tmpfile
-	./mk/portsys.rc package $CACHEOPTS -L -f $tmpfile
+	./mk/portsys.rc install $CACHEOPTS -f $tmpfile
 	rm $tmpfile
 }

@@ -1,28 +1,31 @@
 #!/bin/rc
 #
 
+# VARIABLES
 HOSTARCH=x86_64
 ARCH=x86_64
-COMPILER=ellcc
+COMPILER=ellcc-bin
 ROOTDIR=/mnt/glacies
+ROOTDBDIR=$"ROOTDIR/var/pkg/local
 CACHEDIR=''
 
-##
-RPORTS=git://github.com/eltanin-os/ports
-KHEADS=git://github.com/sabotage-linux/kernel-headers
+# FLAGS:
+# WITHCOMP - Install compiler
+WITHCOMP=false
 
-##
+# URL
+RPORTS=https://github.com/eltanin-os/ports
+KHEADS=https://github.com/sabotage-linux/kernel-headers
+
+# TOOLS:
 FETCH=(curl -LO)
-COMPRESS=(pigz -z -9)
-PKGCOMP=(pigz -z -0)
-UNCOMPRESS=(pigz -dc)
-PKGSUF=pkg.tzz
+SU=doas
 TAR=(pax -x ustar -w)
 UNTAR=(pax -x ustar -r)
 
-##
+# UNCOMPRESS TOOLS
 BZ2=(bzip2 -dc)
 GZ=(pigz -dc)
-LZ=(true)
-XZ=(true)
+LZ=(lzip -dc)
+XZ=(xz -dc)
 ZZ=(pigz -dc)

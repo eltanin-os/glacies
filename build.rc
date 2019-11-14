@@ -5,14 +5,6 @@
 . ./scripts/common/io.rc
 . ./scripts/common/chk.rc
 
-fn bsys_hlp_install @{
-	tmp=`{mktemp}
-	head -n 3 $"TOOLDIR/tmp/ports/pkg/$"1 | sed '/\[vars\]/d' > $"tmp
-	. $"tmp
-	$UNCOMPRESS $"DIRPKGS/$"name'#'$"version.$"PKGSUF | $UNTAR
-	rm $"tmp
-}
-
 TOOLDIR=`{pwd}
 
 if ([ -z $"CC  ]) CC=cc
@@ -21,53 +13,17 @@ if ([ -z $"CXX ]) CXX=c++
 . ./scripts/compiler/$COMPILER.rc
 . ./scripts/common/source.rc
 
-bsys_chk_dep $COMPRESS(1) $FETCH(1) $TAR(1)
-bsys_chk_dep awk byacc fakeroot git make
+bsys_chk_dep $FETCH(1) $SU(1) awk byacc git make
 
-if (![ -e .phase1 ]) {
-	@{ if (![ -d tmp ]) mkdir tmp
-	cd tmp
-	mkdir database packages }
-
-	@{ cd tmp
-	clr_mk_prepare || bsys_io_err failed to prepare the compiler enviroment
-	clr_mk_build   || bsys_io_err failed to build the compiler }
-
-	@{ cd tmp
-	git clone $"KHEADS
-	@{ cd kernel-headers
-	make prefix=/ DESTDIR=$"TOOLDIR/tmp install }
-	CC=`{clr_cc_path}
-	CXX=`{clr_cxx_path}
-	git clone $"RPORTS
-	cd ports
-	PORTS=`{pwd}
-	sed -e 's|^CC=.*|CC='$"CC'|g'                                    \
-	    -e 's|^CXX=.*|CXX='$"CXX'|g'                                 \
-	    -e 's|^CFLAGS=.*|CFLAGS=(-I'$"TOOLDIR'/tmp/include -Os)|g'   \
-	    -e 's|^YACC=|##YACC=|g'                                      \
-	    -e 's|^#YACC=|YACC=|g'                                       \
-	    -e 's|^LDFLAGS=.*|LDFLAGS=(-L'$"TOOLDIR'/tmp/lib -static)|g' \
-	    -e 's|^DBDIR=.*|DBDIR='$"TOOLDIR'/tmp/database|g'            \
-	    mk/config.rc > config.rc~
-	mv config.rc~ mk/config.rc
-	bsys_mk_pkgs || bsys_io_err failed to generate packages }
-
-	if (! ~ $status 0) exit $status
-	touch .phase1
-	bsys_io_msg execute the script again with root permission
-	exit
-}; if not {
-	argv0=`{whoami}
-	if (! ~ $"argv0 'root') bsys_io_err root permission are needed
-
-	cd $"ROOTDIR
+bsys_io_msg preparing root dir
+$SU rc <<EOF
+	cd $ROOTDIR
 
 	# generate directories
-	mkdir bin boot dev etc home include lib libexec\
-	      media mnt opt proc share run src srv sys var
+	@{ mkdir bin boot dev etc home include lib libexec\
+	    media mnt opt proc share run src srv sys var
 	mkdir -m 0750 root
-	mkdir -m 1777 tmp
+	mkdir -m 1777 tmp } || true
 	ln -s .   usr
 	ln -s bin sbin
 
@@ -77,49 +33,76 @@ if (![ -e .phase1 ]) {
 	@{ cd var/pkg
 	mkdir cache local remote tmp }
 
-	# prepare package manager and minimal packages
-	DIRPKGS=$"TOOLDIR/tmp/packages
-	DIRDB=$"TOOLDIR/tmp/database
-
-	bsys_hlp_install lux
-	bsys_hlp_install rc
-
-	cp $"DIRPKGS/*  var/pkg/cache
-	cp $"DIRDB/libc var/pkg/local
-	cp $"DIRDB/*    var/pkg/tmp
-	rm var/pkg/tmp/libc
-
-	@{ cd $"TOOLDIR/tmp
-	clr_mk_install }
-
 	# prepare environment
-	cp -R $"TOOLDIR/scripts/bin .
-	cp -R $"TOOLDIR/etc .
-	ln -s dash bin/sh
-	git clone $"RPORTS
+	cp -R $TOOLDIR/scripts/bin .
+	cp $TOOLDIR/scripts/dbfiles/* var/pkg/local
+	cp -R $TOOLDIR/etc .
+	cp /etc/resolv.conf etc
+	git clone $RPORTS
+	printf 'arch=%s\n' $ARCH >> etc/venus.conf
 
-	# set permissions
-	chmod +t   etc/perp/getty@*
+	# prepare symlinks
+	ln -s dash bin/sh
+
+	# prepare mode
 	chmod 0600 etc/shadow
+EOF
+
+#
+# BUILD/INSTALL PHASE
+#
+
+if (![ -d tmp ]) mkdir tmp
+
+bsys_io_msg preparing the compiler
+@{ cd tmp
+clr_mk_prepare || bsys_io_err failed to prepare the compiler enviroment
+clr_mk_build   || bsys_io_err failed to build the compiler }
+
+bsys_io_msg preparing ports
+@{ cd tmp
+if (! test -d `{basename $"KHEADS}) git clone $"KHEADS
+@{ cd kernel-headers
+$SU make ARCH=$"ARCH prefix=/ DESTDIR=$"ROOTDIR install }
+CC=`{clr_cc_path}
+CXX=`{clr_cxx_path}
+if (! test -d `{basename $"RPORTS}) git clone $"RPORTS
+cd ports
+PORTS=`{pwd}
+tmp=`{mktemp}
+sed -e 's|^CC=.*|CC='$"CC'|g'              \
+    -e 's|^CXX=.*|CXX='$"CXX'|g'           \
+    -e 's|^YACC=|##YACC=|g'                \
+    -e 's|^#YACC=|YACC=|g'                 \
+    -e 's|^DBDIR=.*|DBDIR='$"ROOTDBDIR'|g' \
+    -e 's|^SU=.*|SU='$"SU'|g'              \
+    mk/config.rc > $tmp
+mv $tmp mk/config.rc
+bsys_io_msg installing packages
+bsys_mk_install $"ROOTDIR || bsys_io_err failed to install packages }
+
+if ($WITHCOMP) {
+	bsys_io_msg installing compiler
+	clr_mk_install
+}
+
+bsys_io_msg preparing to chroot
+$SU /bin/rc <<EOF
+	cd $ROOTDIR
+	# prepare mode
+	chmod +t etc/perp/getty@*
 
 	# prepare the environment to chroot
 	mount -t proc none proc
 	mount --rbind /sys sys
 	mount --rbind /dev dev
-	cp /etc/resolv.conf etc
-
-	# use lux to install packages
-	chroot . /bin/rc <<'EOF'
-lux -N explode  /var/pkg/tmp/*
-lux -N add      /var/pkg/tmp/*
-lux -N register /var/pkg/tmp/*
-update-ca-certificates --fresh
-lux populate-remote
-lux populate-chksum
-lux fetch    linux-image linux-headers
-lux explode  linux-image linux-headers
-lux add      linux-image linux-headers
-lux register linux-image linux-headers
-mkinitramfs `{lux show-version linux-image}^-gnu
 EOF
-}
+
+bsys_io_msg entering chroot
+$SU chroot $ROOTDIR /bin/rc <<EOF
+	mkdir -p etc/ssl/certs
+	update-ca-certificates --fresh
+	venus -u
+	venus -a linux-headers linux-image
+	mkinitramfs `{ls /lib/modules}
+EOF
