@@ -63,28 +63,27 @@ bsys_io_msg preparing ports
 @{ cd tmp
 if (! test -d `{basename $"KHEADS}) git clone $"KHEADS
 @{ cd kernel-headers
-$SU make ARCH=$"ARCH prefix=/ DESTDIR=$"ROOTDIR install }
+make ARCH=$"ARCH prefix=/ DESTDIR=$"TOOLDIR/tmp install }
 CC=`{clr_cc_path}
 CXX=`{clr_cxx_path}
 if (! test -d `{basename $"RPORTS}) git clone $"RPORTS
-cd ports
+@{ cd ports
 PORTS=`{pwd}
 tmp=`{mktemp}
 sed -e 's|^CC=.*|CC='$"CC'|g'              \
     -e 's|^CXX=.*|CXX='$"CXX'|g'           \
-    -e 's|^YACC=|##YACC=|g'                \
-    -e 's|^#YACC=|YACC=|g'                 \
     -e 's|^DBDIR=.*|DBDIR='$"ROOTDBDIR'|g' \
     -e 's|^SU=.*|SU='$"SU'|g'              \
     mk/config.rc > $tmp
 mv $tmp mk/config.rc
+clr_cc_cflags mk/config.rc
 bsys_io_msg installing packages
+PORTSYS_EXTRAPATH=$"TOOLDIR/tmp
 bsys_mk_install $"ROOTDIR || bsys_io_err failed to install packages }
-
 if ($WITHCOMP) {
 	bsys_io_msg installing compiler
 	clr_mk_install
-}
+}}
 
 bsys_io_msg preparing to chroot
 $SU /bin/rc <<EOF

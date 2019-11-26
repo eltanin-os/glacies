@@ -9,13 +9,14 @@ REPOSITORY=''
 
 fn packages {
 cat <<EOF
-[deps]
+[all]
+libressl
+[dev]
 ncurses
 libedit
-libressl
 libz
 tertium
-[all]
+[bin]
 bzip2
 ca-certificates
 ccore
@@ -44,6 +45,6 @@ fn bsys_mk_install {
 	PORTSYS_SYSPATH=$1
 	tmpfile=`{mktemp}
 	packages >$tmpfile
-	./mk/portsys.rc install $CACHEOPTS -f $tmpfile
+	./mk/portsys.rc install -L -B $CACHEOPTS -f $tmpfile
 	rm $tmpfile
 }

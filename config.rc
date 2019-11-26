@@ -19,13 +19,4 @@ KHEADS=https://github.com/sabotage-linux/kernel-headers
 
 # TOOLS:
 FETCH=(curl -LO)
-SU=doas
-TAR=(pax -x ustar -w)
-UNTAR=(pax -x ustar -r)
-
-# UNCOMPRESS TOOLS
-BZ2=(bzip2 -dc)
-GZ=(pigz -dc)
-LZ=(lzip -dc)
-XZ=(xz -dc)
-ZZ=(pigz -dc)
+SU=sudo

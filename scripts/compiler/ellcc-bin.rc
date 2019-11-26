@@ -1,21 +1,30 @@
-# ONLY FOR TEST
 #!/bin/rc -e
 
 VER=2017-08-23
 URL=http://ellcc.org/releases/latest/ellcc-$"HOSTARCH-linux-$"VER.bz2
 
+# $*: void
 fn clr_cc_path @{
 	cd ellcc
 	p=`{pwd}
 	printf $"p/bin/ecc
 }
 
+# $1: config file
+fn clr_cc_cflags @{
+	tmp=`{mktemp}
+	sed 's/CFLAGS=-Os/CFLAGS=-Oz/g' $1 > $tmp
+	mv $tmp $1
+}
+
+# $*: void
 fn clr_cxx_path @{
 	cd ellcc
 	p=`{pwd}
 	printf $"p/bin/ecc++
 }
 
+# $*: void
 fn clr_mk_prepare {
 	file=`{basename $"URL}
 	if (test -n $CACHEDIR) file=$"CACHEDIR/$"file
@@ -23,7 +32,7 @@ fn clr_mk_prepare {
 		$FETCH $"URL
 		mv `{basename $"URL} $"file
 	}
-	$BZ2 $"file | $UNTAR
+	bzcat $"file | tar -x
 	@{ cd ellcc/libecc/lib/$"HOSTARCH-linux
 	rm libcares* libcurl* libcurses* \
 	libexpat* libform* libmbed*      \
@@ -32,12 +41,14 @@ fn clr_mk_prepare {
 	libz* }
 }
 
+# $*: void
 fn clr_mk_build @{
 	tmp=`{mktemp}
 	printf '# version: a08910fc2cc739f631b75b2d09b8d72a0d64d285\n' > $tmp
 	$SU mv $tmp $ROOTDBDIR/libc
 }
 
+# $*: void
 fn clr_mk_install @{
 	cd ellcc
 	$SU mkdir -p $"ROOTDIR/opt/ellcc

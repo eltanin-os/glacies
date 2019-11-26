@@ -1,18 +1,28 @@
 #!/bin/rc -e
 #
 
+# $*: void
 fn clr_cc_path @{
 	cd ellcc
 	p=`{pwd}
 	printf $"p/bin/ecc
 }
 
+# $1: config file
+fn clr_cc_cflags @{
+	tmp=`{mktemp}
+	sed 's/CFLAGS=-Os/CFLAGS=-Oz/g' $1 > $tmp
+	mv $tmp $1
+}
+
+# $*: void
 fn clr_cxx_path @{
 	cd ellcc
 	p=`{pwd}
 	printf $"p/bin/ecc++
 }
 
+# $*: void
 fn clr_mk_prepare {
 	bsys_chk_dep autoconf automake bash bison cmake flex git make svn
 	svn co http://ellcc.org/svn/ellcc/trunk ellcc
@@ -22,6 +32,7 @@ fn clr_mk_prepare {
 	} }
 }
 
+# $*: void
 fn clr_mk_build {
 	@{ cd ellcc
 	./ellcc build }
@@ -30,6 +41,7 @@ fn clr_mk_build {
 	$SU mv $tmp $ROOTDBDIR/libc
 }
 
+# $*: void
 fn clr_mk_install @{
 	cd ellcc
 	$SU mkdir -p $"ROOTDIR/opt/ellcc
