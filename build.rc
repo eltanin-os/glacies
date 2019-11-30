@@ -2,16 +2,14 @@
 #
 
 . ./config.rc
-. ./scripts/common/io.rc
-. ./scripts/common/chk.rc
+. ./sys/common.rc
 
 TOOLDIR=`{pwd}
 
-if ([ -z $"CC  ]) CC=cc
-if ([ -z $"CXX ]) CXX=c++
+if (test -z $"CC) CC=cc
+if (test -z $"CXX) CXX=c++
 
-. ./scripts/compiler/$COMPILER.rc
-. ./scripts/common/source.rc
+. ./sys/compilers/$COMPILER.rc
 
 bsys_chk_dep $FETCH(1) $SU(1) awk byacc git make
 
@@ -34,9 +32,9 @@ $SU rc <<EOF
 	mkdir cache local remote tmp }
 
 	# prepare environment
-	cp -R $TOOLDIR/scripts/bin .
-	cp $TOOLDIR/scripts/dbfiles/* var/pkg/local
-	cp -R $TOOLDIR/etc .
+	cp -R $TOOLDIR/sys/bin .
+	cp $TOOLDIR/sys/dbfiles/* var/pkg/local
+	cp -R $TOOLDIR/sys/etc .
 	cp /etc/resolv.conf etc
 	git clone $RPORTS
 	printf 'arch=%s\n' $ARCH >> etc/venus.conf
@@ -52,7 +50,7 @@ EOF
 # BUILD/INSTALL PHASE
 #
 
-if (![ -d tmp ]) mkdir tmp
+if (! test -d tmp) mkdir tmp
 
 bsys_io_msg preparing the compiler
 @{ cd tmp
@@ -66,7 +64,8 @@ if (! test -d `{basename $"KHEADS}) git clone $"KHEADS
 make ARCH=$"ARCH prefix=/ DESTDIR=$"TOOLDIR/tmp install }
 CC=`{clr_cc_path}
 CXX=`{clr_cxx_path}
-if (! test -d `{basename $"RPORTS}) git clone $"RPORTS
+cp -R /home/eadwardus/Workspace/EltaninOS/ports .
+#if (! test -d `{basename $"RPORTS}) git clone $"RPORTS
 @{ cd ports
 PORTS=`{pwd}
 tmp=`{mktemp}
@@ -78,8 +77,7 @@ sed -e 's|^CC=.*|CC='$"CC'|g'              \
 mv $tmp mk/config.rc
 clr_cc_cflags mk/config.rc
 bsys_io_msg installing packages
-PORTSYS_EXTRAPATH=$"TOOLDIR/tmp
-bsys_mk_install $"ROOTDIR || bsys_io_err failed to install packages }
+bsys_mk_install $"ROOTDIR $"TOOLDIR/tmp }
 if ($WITHCOMP) {
 	bsys_io_msg installing compiler
 	clr_mk_install

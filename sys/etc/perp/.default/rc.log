@@ -5,7 +5,7 @@ if (! ~ $"1 start ) exit
 
 logdir=/var/log/$"2
 
-if (![ -d $logdir ]) {
+if (! test -d $logdir) {
 	mkdir $logdir
 	chown log:log $logdir
 }

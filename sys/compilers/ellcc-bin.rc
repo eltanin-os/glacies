@@ -1,5 +1,7 @@
 #!/bin/rc -e
-#
+
+VER=2017-08-23
+URL=http://ellcc.org/releases/latest/ellcc-$"HOSTARCH-linux-$"VER.bz2
 
 # $*: void
 fn clr_cc_path @{
@@ -24,21 +26,26 @@ fn clr_cxx_path @{
 
 # $*: void
 fn clr_mk_prepare {
-	bsys_chk_dep autoconf automake bash bison cmake flex git make svn
-	svn co http://ellcc.org/svn/ellcc/trunk ellcc
-	@{ cd ellcc
-	for (patch in $"TOOLDIR/scripts/patches/ellcc/*) {
-		patch -p0 < $patch
-	} }
+	file=`{basename $"URL}
+	if (test -n $CACHEDIR) file=$"CACHEDIR/$"file
+	if (! test -f $"file) {
+		$FETCH $"URL
+		mv `{basename $"URL} $"file
+	}
+	bzcat $"file | tar -x
+	@{ cd ellcc/libecc/lib/$"HOSTARCH-linux
+	rm libcares* libcurl* libcurses* \
+	libexpat* libform* libmbed*      \
+	libmenu* libmeta* libncurses*    \
+	libpanel* libssh* libterm*       \
+	libz* }
 }
 
 # $*: void
-fn clr_mk_build {
-	@{ cd ellcc
-	./ellcc build }
+fn clr_mk_build @{
 	tmp=`{mktemp}
 	printf '# version: a08910fc2cc739f631b75b2d09b8d72a0d64d285\n' > $tmp
-	$SU mv $tmp $ROOTDBDIR/libc
+	$SU mv $tmp $ROOTDBDIR/libc-dev
 }
 
 # $*: void

@@ -6,10 +6,10 @@ do_protected_symlinks=false
 do_protected_hardlinks=true
 
 if ($do_disable_overcommit)
-	printf '%s\n' 2 > /proc/sys/vm/overcommit_memory
+	echo 2 > /proc/sys/vm/overcommit_memory
 
 if ($do_protected_symlinks)
-	printf '%s\n' 1 > /proc/sys/fs/protected_symlinks
+	echo 1 > /proc/sys/fs/protected_symlinks
 
 if ($do_protected_hardlinks)
-	printf '%s\n' 1 > /proc/sys/fs/protected_hardlinks
+	echo 1 > /proc/sys/fs/protected_hardlinks
