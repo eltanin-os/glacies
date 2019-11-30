@@ -64,8 +64,7 @@ if (! test -d `{basename $"KHEADS}) git clone $"KHEADS
 make ARCH=$"ARCH prefix=/ DESTDIR=$"TOOLDIR/tmp install }
 CC=`{clr_cc_path}
 CXX=`{clr_cxx_path}
-cp -R /home/eadwardus/Workspace/EltaninOS/ports .
-#if (! test -d `{basename $"RPORTS}) git clone $"RPORTS
+if (! test -d `{basename $"RPORTS}) git clone $"RPORTS
 @{ cd ports
 PORTS=`{pwd}
 tmp=`{mktemp}
