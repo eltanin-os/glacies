@@ -18,18 +18,24 @@ $SU rc <<EOF
 	cd $ROOTDIR
 
 	# generate directories
-	@{ mkdir bin boot dev etc home include lib libexec\
-	    media mnt opt proc share run src srv sys var
-	mkdir -m 0750 root
-	mkdir -m 1777 tmp } || true
+	@{
+		mkdir bin boot dev etc home include lib libexec\
+		    media mnt opt proc share run src srv sys var
+		mkdir -m 0750 root
+		mkdir -m 1777 tmp
+	} ||;
 	ln -s .   usr
 	ln -s bin sbin
 
-	@{ cd var
-	mkdir empty lib lock log pkg run spool }
+	@{
+		cd var
+		mkdir empty lib lock log pkg run spool
+	}
 
-	@{ cd var/pkg
-	mkdir cache local remote tmp }
+	@{
+		cd var/pkg
+		mkdir cache local remote
+	}
 
 	# prepare environment
 	cp -R $TOOLDIR/sys/bin .
@@ -53,34 +59,41 @@ EOF
 if (! test -d tmp) mkdir tmp
 
 bsys_io_msg preparing the compiler
-@{ cd tmp
-clr_mk_prepare || bsys_io_err failed to prepare the compiler enviroment
-clr_mk_build   || bsys_io_err failed to build the compiler }
+@{
+	cd tmp
+	clr_mk_prepare || bsys_io_err failed to prepare the compiler enviroment
+	clr_mk_build   || bsys_io_err failed to build the compiler
+}
 
 bsys_io_msg preparing ports
-@{ cd tmp
-if (! test -d `{basename $"KHEADS}) git clone $"KHEADS
-@{ cd kernel-headers
-make ARCH=$"ARCH prefix=/ DESTDIR=$"TOOLDIR/tmp install }
-CC=`{clr_cc_path}
-CXX=`{clr_cxx_path}
-if (! test -d `{basename $"RPORTS}) git clone $"RPORTS
-@{ cd ports
-PORTS=`{pwd}
-tmp=`{mktemp}
-sed -e 's|^CC=.*|CC='$"CC'|g'              \
-    -e 's|^CXX=.*|CXX='$"CXX'|g'           \
-    -e 's|^DBDIR=.*|DBDIR='$"ROOTDBDIR'|g' \
-    -e 's|^SU=.*|SU='$"SU'|g'              \
-    mk/config.rc > $tmp
-mv $tmp mk/config.rc
-clr_cc_cflags mk/config.rc
-bsys_io_msg installing packages
-bsys_mk_install $"ROOTDIR $"TOOLDIR/tmp }
-if ($WITHCOMP) {
-	bsys_io_msg installing compiler
-	clr_mk_install
-}}
+@{
+	cd tmp
+	if (! test -d `{basename $"KHEADS}) git clone $"KHEADS
+	@{
+		cd kernel-headers
+		make ARCH=$"ARCH prefix=/ DESTDIR=$"TOOLDIR/tmp install
+	}
+	CC=`{clr_cc_path}
+	CXX=`{clr_cxx_path}
+	if (! test -d `{basename $"RPORTS}) git clone $"RPORTS
+	@{
+		cd ports
+		PORTS=`{pwd}
+		tmp=`{mktemp}
+		sed -e 's|^CC=.*|CC='$"CC'|g'    \
+		    -e 's|^CXX=.*|CXX='$"CXX'|g' \
+		    -e 's|^SU=.*|SU='$"SU'|g'    \
+		    mk/config.rc > $tmp
+		mv $tmp mk/config.rc
+		clr_cc_cflags mk/config.rc
+		bsys_io_msg installing packages
+		bsys_mk_install $"ROOTDIR $"TOOLDIR/tmp
+	}
+	if ($WITHCOMP) {
+		bsys_io_msg installing compiler
+		clr_mk_install
+	}
+}
 
 bsys_io_msg preparing to chroot
 $SU /bin/rc <<EOF
