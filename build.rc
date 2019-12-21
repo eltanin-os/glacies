@@ -38,9 +38,7 @@ $SU rc <<EOF
 	}
 
 	# prepare environment
-	cp -R $TOOLDIR/sys/bin .
-	cp $TOOLDIR/sys/dbfiles/* var/pkg/local
-	cp -R $TOOLDIR/sys/etc .
+	cp -R $TOOLDIR/root/* .
 	cp /etc/resolv.conf etc
 	git clone $RPORTS
 	printf 'arch=%s\n' $ARCH >> etc/venus.conf
@@ -50,6 +48,7 @@ $SU rc <<EOF
 
 	# prepare mode
 	chmod 0600 etc/shadow
+	chmod 1777 tmp
 EOF
 
 #
