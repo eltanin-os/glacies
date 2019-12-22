@@ -1,10 +1,11 @@
 #!/bin/rc
 #
 mount -o remount,rw /
-mount -a
 
 mkdir /dev/pts
 mkdir /dev/shm
+
+mount -a
 
 mdevd-coldplug
 mdevd &
@@ -14,5 +15,8 @@ ip link set lo up
 dmesg >/var/log/dmesg.log
 
 /etc/rc.local
+
+aliases=`{find /sys -type f -name 'modalias' -exec cat '{}' + | sort -u}
+modprobe -aq $aliases `{cat /etc/modules}
 
 exec perpboot /etc/perp

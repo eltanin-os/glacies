@@ -13,8 +13,8 @@ mount -nt sysfs none /sys
 
 mdevd-coldplug
 
-modules=`{cat /etc/modules}
-for (mod in $modules) modprobe $mod
+aliases=`{find /sys -type f -name 'modalias' -exec cat '{}' + | sort -u}
+modprobe -aq $aliases
 
 cmdline=`{cat /proc/cmdline}
 for (cmd in $cmdline) {
