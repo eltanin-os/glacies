@@ -45,6 +45,7 @@ fn bsys_io_wrn {
 fn bsys_mk_install {
 	CACHEOPTS=()
 	if (test -d $"CACHEDIR) CACHEOPTS=(-d $"CACHEDIR)
-	pkg=`{cat $"TOOLDIR/sys/packages}
+	setdir=$"TOOLDIR/sys/sets/
+	pkg=`{cat $setdir$SETS}
 	./mk/portsys.rc install $CACHEOPTS -e $"2 -r $"1 $"pkg
 }
