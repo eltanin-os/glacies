@@ -10,7 +10,8 @@ device=''
 
 mount -nt proc none /proc
 mount -nt sysfs none /sys
-mount -nt devtmpfs none /dev
+
+mdevd-coldplug
 
 modules=`{cat /etc/modules}
 for (mod in $modules) modprobe $mod
@@ -54,6 +55,5 @@ mount -nt $"rootfstype -o $"rootflags $"device /.root
 
 umount /proc
 umount /sys
-umount /dev
 
 exec switch_root /.root $"init $*

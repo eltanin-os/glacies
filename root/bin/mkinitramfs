@@ -20,9 +20,8 @@ fn fhbuild @{
 
 fn filesbuild @{
 	cd $"1
-	cp /etc/modules etc
 	touch etc/fstab
-	files=`{venus -l files ccore ecore kmod rc ubase | tr ' ' '\n' | egrep -v 'man[0-9]|include'}
+	files=`{venus -l files ccore ecore kmod mdevd rc ubase | tr ' ' '\n' | egrep -v 'man[0-9]|include'}
 	for (f in $files) cp -f /$f $f
 }
 

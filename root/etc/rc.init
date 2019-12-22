@@ -1,13 +1,13 @@
 #!/bin/rc
-
-mount -t devtmpfs dev /dev -o nosuid,mode=755
+#
+mount -o remount,rw /
+mount -a
 
 mkdir /dev/pts
 mkdir /dev/shm
 
-mount -t proc none /proc
-mount -o remount,rw /
-mount -a
+mdevd-coldplug
+mdevd &
 
 hostname `{cat /etc/hostname}
 ip link set lo up

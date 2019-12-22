@@ -8,6 +8,7 @@ iproute2
 kmod
 libressl
 mandoc
+mdevd
 ncurses
 openssh
 pdlzip
