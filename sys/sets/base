@@ -10,6 +10,7 @@ libressl
 mandoc
 mdevd
 ncurses
+neatvi
 openssh
 pdlzip
 perp
@@ -19,3 +20,4 @@ sdhcp
 sinit
 ubase
 venus
+xz
