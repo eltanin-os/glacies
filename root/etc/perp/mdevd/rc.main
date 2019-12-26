@@ -1,0 +1,3 @@
+#!/bin/rc
+if (! ~ $"1 start) exit
+exec mdevd

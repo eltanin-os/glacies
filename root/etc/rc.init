@@ -1,14 +1,22 @@
 #!/bin/rc
 #
+mount -nt sysfs none /sys
+mount -nt proc  none /proc
+
 mount -o remount,rw /
 
-mkdir /dev/pts
-mkdir /dev/shm
+# do coldplug and die (mdevd is started later)
+mdevd &
+mdevd-coldplug
+kill `{ps -A | awk '/mdevd/ {print $1}'} >[2]/dev/null ||;
+
+if (! test -d /dev/pts) mkdir /dev/pts
+mount -nt devpts none /dev/pts
+if (! test -d /dev/shm) mkdir /dev/shm
+mount -nt tmpfs  none /dev/shm
 
 mount -a
-
-mdevd-coldplug
-mdevd &
+swapon -a
 
 hostname `{cat /etc/hostname}
 ip link set lo up

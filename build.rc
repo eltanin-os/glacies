@@ -98,7 +98,7 @@ bsys_io_msg preparing to chroot
 $SU /bin/rc <<EOF
 	cd $ROOTDIR
 	# prepare mode
-	chmod +t etc/perp/getty@*
+	chmod +t etc/perp/*
 
 	# prepare the environment to chroot
 	mount -t proc none proc
@@ -111,6 +111,6 @@ $SU chroot $ROOTDIR /bin/rc <<EOF
 	mkdir -p etc/ssl/certs
 	update-ca-certificates --fresh
 	venus -u
-	venus -a linux-headers linux-image
+	venus -a linux linux-dev
 	mkinitramfs `{ls /lib/modules}
 EOF
