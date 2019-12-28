@@ -28,6 +28,11 @@ $SU rc <<EOF
 	ln -s bin sbin
 
 	@{
+		cd dev
+		mkdir pts shm
+	}
+
+	@{
 		cd var
 		mkdir empty lib lock log pkg run spool
 	}

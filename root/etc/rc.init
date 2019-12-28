@@ -10,9 +10,7 @@ mdevd &
 mdevd-coldplug
 kill `{ps -A | awk '/mdevd/ {print $1}'} >[2]/dev/null ||;
 
-if (! test -d /dev/pts) mkdir /dev/pts
 mount -nt devpts none /dev/pts
-if (! test -d /dev/shm) mkdir /dev/shm
 mount -nt tmpfs  none /dev/shm
 
 mount -a
