@@ -5,12 +5,10 @@ mount -nt proc  none /proc
 
 mount -o remount,rw /
 
-# do coldplug and die (mdevd is started later)
-mdevd &
-mdevd-coldplug
-kill `{ps -A | awk '/mdevd/ {print $1}'} >[2]/dev/null ||;
-
+mount -nt devtmpfs none /dev
+mkdir /dev/pts
 mount -nt devpts none /dev/pts
+mkdir /dev/shm
 mount -nt tmpfs  none /dev/shm
 
 mount -a
@@ -22,7 +20,7 @@ dmesg >/var/log/dmesg.log
 
 /etc/rc.local
 
-aliases=`{find /sys -type f -name 'modalias' -exec cat '{}' + | sort -u}
-modprobe -aq $aliases `{cat /etc/modules}
+modules=`{cat /etc/modules}
+if (! ~ $#modules 0) modprobe -aq $modules
 
 exec perpboot /etc/perp
