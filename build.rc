@@ -13,6 +13,9 @@ if (test -z $"CXX) CXX=c++
 
 bsys_chk_dep $FETCH(1) $SU(1) awk byacc git make
 
+m=`{$SU rc -c 'umask'}
+if (! ~ $m 022) bsys_io_error umask must be 022 instead of $m
+
 bsys_io_msg preparing root dir
 $SU rc <<EOF
 	cd $ROOTDIR
@@ -26,11 +29,6 @@ $SU rc <<EOF
 	} ||;
 	ln -s .   usr
 	ln -s bin sbin
-
-	@{
-		cd dev
-		mkdir pts shm
-	}
 
 	@{
 		cd var
