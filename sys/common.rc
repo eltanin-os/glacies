@@ -47,5 +47,5 @@ fn bsys_mk_install {
 	if (test -d $"CACHEDIR) CACHEOPTS=(-d $"CACHEDIR)
 	setdir=$"TOOLDIR/sys/sets/
 	pkg=`{cat $setdir$SETS}
-	./mk/portsys.rc install $CACHEOPTS -e $"2 -r $"1 $"pkg
+	./mk/portsys.rc install $CACHEOPTS -e $"2 -r $"1 $pkg
 }
