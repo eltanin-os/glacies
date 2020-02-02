@@ -44,7 +44,7 @@ fn clr_mk_prepare {
 # $*: void
 fn clr_mk_build @{
 	tmp=`{mktemp}
-	printf '# version: a08910fc2cc739f631b75b2d09b8d72a0d64d285\n' > $tmp
+	printf 'version:svn-a08910fc2cc739f631b75b2d09b8d72a0d64d285\n' > $tmp
 	$SU mv $tmp $ROOTDBDIR/libc-dev
 }
 
@@ -53,6 +53,4 @@ fn clr_mk_install @{
 	cd ellcc
 	$SU mkdir -p $"ROOTDIR/opt/ellcc
 	$SU cp -R bin lib libecc $"ROOTDIR/opt/ellcc
-	$SU ln -s ../opt/ellcc/bin/ecc   $"ROOTDIR/bin/cc
-	$SU ln -s ../opt/ellcc/bin/ecc++ $"ROOTDIR/bin/c++
 }

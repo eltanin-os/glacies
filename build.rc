@@ -44,7 +44,7 @@ $SU rc <<EOF
 	cp -R $TOOLDIR/root/* .
 	cp /etc/resolv.conf etc
 	git clone $RPORTS
-	printf 'arch=%s\n' $ARCH >> etc/venus.conf
+	printf 'arch:%s\n' $ARCH >> etc/venus.conf
 
 	# prepare symlinks
 	ln -s dash bin/sh
