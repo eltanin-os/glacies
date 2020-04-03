@@ -1,6 +1,7 @@
 bzip2
 ca-certificates
 ccore
+clzip
 curl
 dash
 ecore
@@ -12,11 +13,9 @@ mdevd
 ncurses
 neatvi
 openssh
-pdlzip
 perp
 pigz
 rc
-sdhcp
 sinit
 ubase
 venus

@@ -1,119 +1,136 @@
 #!/bin/rc -e
+
+#
+# io routines
 #
 
-. ./config.rc
-. ./sys/common.rc
+fn die {
+	echo $progname: '<error>' $* >[1=2]
+	exit 1
+}
 
-TOOLDIR=`{pwd}
+fn msg {
+	echo $progname: '<message>' $*
+}
 
-if (test -z $"CC) CC=cc
-if (test -z $"CXX) CXX=c++
+#
+# misc routines
+#
 
-. ./sys/compilers/$COMPILER.rc
+# $1 : tool
+fn search {
+	for (p in $path) if (test -f $"p/$"1) return 0
+	return 1
+}
 
-bsys_chk_dep $FETCH(1) $SU(1) awk byacc git make
+# $1 : tool
+fn searchfail {
+	search $1 || die $1: not found
+}
 
-m=`{$SU rc -c 'umask'}
-if (! ~ $m 022) bsys_io_error umask must be 022 instead of $m
+# $* : tool, args
+fn trydep {
+	tools=''
+	for (tool in $*) {
+		args=`{echo $tool}
+		search $args && {
+			echo $args
+			return 0
+		}
+		tools=' '^$args(1)
+	}
+	die $tools: not found
+}
 
-bsys_io_msg preparing root dir
-$SU rc <<EOF
-	cd $ROOTDIR
+#
+# main
+#
 
-	# generate directories
-	@{
-		mkdir bin boot dev etc home include lib libexec\
-		    media mnt opt proc share run src srv sys var
-		mkdir -m 0750 root
-		mkdir -m 1777 tmp
-	} ||;
-	ln -s .   usr
+SU=`{trydep 'doas' 'sudo' 'su -c'}
+m=`{$SU /bin/rc -c 'umask'}
+progname=`{basename $0}
+if (! ~ $m 022) die $SU umask must be 022
+
+ARCH=`{uname -m}
+FETCH=`{trydep 'curl -LO' 'wget'}
+UNGZ=`{trydep 'pigz -dc' 'gzip -dc'}
+UNLZ=`{trydep 'lzip -dc' 'clzip -dc' 'pdlzip -dc'}
+UNTAR=`{trydep 'pax -r' 'tar -x' 'bsdtar -x'}
+UNBZ2=`{trydep 'bzip2 -dc'}
+
+searchfail git
+searchfail make
+
+msg preparing temporary build environment
+pwd=`{pwd}
+destdir=$"pwd'/workdir'
+@{ cd workdir
+# ports
+cp -R /home/eadwardus/Workspace/EltaninOS/ports .
+#git clone 'https://git.tuxfamily.org/eltaninos/ports.git' # XXX
+tmp=`{mktemp}
+sed -e 's;^AR=.*;AR=/ellcc/bin/ecc-ar;g' \
+    -e 's;^CC=.*;CC=/ellcc/bin/ecc;g' \
+    -e 's;^CXX=.*;CXX=/ellcc/bin/ecc++;g' \
+    -e 's;^RANLIB=.*;RANLIB=/ellcc/bin/ecc-ranlib;g' \
+    -e 's;^STRIP=.*;STRIP=/ellcc/bin/ecc-strip;g' ports/mk/config.rc > $tmp
+mv $tmp ports/mk/config.rc
+# ellcc
+file='ellcc-'$"ARCH'-linux-2017-08-23.bz2'
+url='http://ellcc.org/releases/latest/'$"file
+cp /home/eadwardus/Workspace/TestZone/cache/$"file .
+# $FETCH $url # XXX
+@{ $UNBZ2 $"file | $UNTAR } || true # false bzip2 error
+mkdir -p mnt/var/pkg/local
+dest='mnt/var/pkg/local/libc-dev'
+awk '{ print "version:" $2 "-" $1 }' ellcc/libecc/patches/musl.revision > $dest
+# root
+file='root-'$"ARCH'.tar.lz'
+cp /home/eadwardus/Workspace/TestZone/cache/$"file .
+#$FETCH 'https://downloads.eltan.in.net/files/root/'$"file # XXX
+$UNLZ $file | $UNTAR
+mkdir -p etc/ssl/certs
+cp /etc/ssl/certs/ca-certificates.crt etc/ssl/certs }
+
+tmpdir=`{mktemp -d}
+@{ cd $tmpdir
+git clone https://github.com/sabotage-linux/kernel-headers
+@{ cd kernel-headers
+make ARCH=$ARCH prefix=/ DESTDIR=$destdir install } }
+rm -Rf $tmpdir
+
+msg building glacies
+@{ cd workdir
+mkdir dev proc sys
+$SU mount -t proc none proc
+$SU mount -o bind /sys sys
+$SU mount -o bind /dev dev }
+
+$SU env PATH=/bin chroot workdir /bin/rc <<EOF
+	@{ cd mnt
+	mkdir bin boot dev etc home include lib libexec \
+	      media mnt opt proc share run src srv sys var
+	mkdir -m 0750 root
+	mkdir -m 1777 tmp
+	@{ cd var
+	mkdir empty lib lock log pkg run spool }
+	@{ cd var/pkg
+	mkdir cache local remote }
+	ln -s . usr
 	ln -s bin sbin
-
-	@{
-		cd var
-		mkdir empty lib lock log pkg run spool
-	}
-
-	@{
-		cd var/pkg
-		mkdir cache local remote
-	}
-
-	# prepare environment
-	cp -R $TOOLDIR/root/* .
-	cp /etc/resolv.conf etc
-	git clone $RPORTS
-	printf 'arch:%s\n' $ARCH >> etc/venus.conf
-
-	# prepare symlinks
 	ln -s dash bin/sh
-
-	# prepare mode
-	chmod 0600 etc/shadow
-	chmod 1777 tmp
+	chmod 0600 etc/shadow }
+	PORTS='/ports/'
+	/ports/mk/portsys.rc install -e / -r /mnt `{cat '/pkgset'}
+	cp -R root/* mnt
+	printf 'arch:%s\n' `{uname -m} >> mnt/etc/venus.conf
+	cp -R bin/glacies-install.rc mnt/bin
 EOF
 
-#
-# BUILD/INSTALL PHASE
-#
+msg finishing glacies build
+@{ cd workdir
+$SU umount dev proc sys
+cd mnt
+$SU env PATH=/bin chroot . glacies-install.rc }
 
-if (! test -d tmp) mkdir tmp
-
-bsys_io_msg preparing the compiler
-@{
-	cd tmp
-	clr_mk_prepare || bsys_io_err failed to prepare the compiler enviroment
-	clr_mk_build   || bsys_io_err failed to build the compiler
-}
-
-bsys_io_msg preparing ports
-@{
-	cd tmp
-	if (! test -d `{basename $"KHEADS}) git clone $"KHEADS
-	@{
-		cd kernel-headers
-		make ARCH=$"ARCH prefix=/ DESTDIR=$"TOOLDIR/tmp install
-	}
-	CC=`{clr_cc_path}
-	CXX=`{clr_cxx_path}
-	if (! test -d `{basename $"RPORTS}) git clone $"RPORTS
-	@{
-		cd ports
-		PORTS=`{pwd}
-		tmp=`{mktemp}
-		sed -e 's|^CC=.*|CC='$"CC'|g'    \
-		    -e 's|^CXX=.*|CXX='$"CXX'|g' \
-		    -e 's|^SU=.*|SU='$"SU'|g'    \
-		    mk/config.rc > $tmp
-		mv $tmp mk/config.rc
-		clr_cc_cflags mk/config.rc
-		bsys_io_msg installing packages
-		bsys_mk_install $"ROOTDIR $"TOOLDIR/tmp
-	}
-	if ($WITHCOMP) {
-		bsys_io_msg installing compiler
-		clr_mk_install
-	}
-}
-
-bsys_io_msg preparing to chroot
-$SU /bin/rc <<EOF
-	cd $ROOTDIR
-	# prepare mode
-	chmod +t etc/perp/*
-
-	# prepare the environment to chroot
-	mount -t proc none proc
-	mount --rbind /sys sys
-	mount --rbind /dev dev
-EOF
-
-bsys_io_msg entering chroot
-$SU chroot $ROOTDIR /bin/rc <<EOF
-	mkdir -p etc/ssl/certs
-	update-ca-certificates --fresh
-	venus -u
-	venus -a linux linux-dev
-	mkinitramfs `{ls /lib/modules}
-EOF
+msg done
