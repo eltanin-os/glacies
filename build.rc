@@ -5,12 +5,12 @@
 #
 
 fn die {
-	echo $progname: '<error>' $* >[1=2]
+	echo $progname : '<error>' $* >[1=2]
 	exit 1
 }
 
 fn msg {
-	echo $progname: '<message>' $*
+	echo $progname : '<message>' $*
 }
 
 #
@@ -19,8 +19,7 @@ fn msg {
 
 # $1 : tool
 fn search {
-	for (p in $path) if (test -f $"p/$"1) return 0
-	return 1
+	@{ for (p in $path) if (test -f $"p/$1) exit 0 }
 }
 
 # $1 : tool
@@ -30,28 +29,29 @@ fn searchfail {
 
 # $* : tool, args
 fn trydep {
-	tools=''
-	for (tool in $*) {
+	@{ for (tool in $*) {
 		args=`{echo $tool}
 		search $args && {
 			echo $args
-			return 0
+			exit 0
 		}
 		tools=' '^$args(1)
-	}
-	die $tools: not found
+	}}
+	if (! ~ $status 0) die '"'$*'"' : not found
 }
 
 #
 # main
 #
 
+progname=`{basename $0}
 SU=`{trydep 'doas' 'sudo' 'su -c'}
 m=`{$SU /bin/rc -c 'umask'}
-progname=`{basename $0}
-if (! ~ $m 022) die $SU umask must be 022
+if (! ~ $m 022 && ! ~ $m 22) die $SU umask must be 022
 
-ARCH=`{uname -m}
+HOSTARCH=`{uname -m}
+tolower=`{trydep 'awk {print(tolower($0))}' 'tr [A-Z] [a-z]'}
+HOSTOS=`{uname -s | $tolower}
 FETCH=`{trydep 'curl -LO' 'wget'}
 UNGZ=`{trydep 'pigz -dc' 'gzip -dc'}
 UNLZ=`{trydep 'lzip -dc' 'clzip -dc' 'pdlzip -dc'}
@@ -66,7 +66,7 @@ pwd=`{pwd}
 destdir=$"pwd'/workdir'
 @{ cd workdir
 # ports
-git clone 'https://git.tuxfamily.org/eltaninos/ports.git'
+git clone https://git.tuxfamily.org/eltaninos/ports.git
 tmp=`{mktemp}
 sed -e 's;^AR=.*;AR=/ellcc/bin/ecc-ar;g' \
     -e 's;^CC=.*;CC=/ellcc/bin/ecc;g' \
@@ -75,16 +75,15 @@ sed -e 's;^AR=.*;AR=/ellcc/bin/ecc-ar;g' \
     -e 's;^STRIP=.*;STRIP=/ellcc/bin/ecc-strip;g' ports/mk/config.rc > $tmp
 mv $tmp ports/mk/config.rc
 # ellcc
-file='ellcc-'$"ARCH'-linux-2017-08-23.bz2'
-url='http://ellcc.org/releases/latest/'$"file
-$FETCH $url
+file='ellcc-'$"HOSTARCH'-linux-2017-08-23.bz2'
+$FETCH http://ellcc.org/releases/latest/$file
 @{ $UNBZ2 $"file | $UNTAR } || true # false bzip2 error
 mkdir -p mnt/var/pkg/local
 dest='mnt/var/pkg/local/libc-dev'
 awk '{ print "version:" $2 "-" $1 }' ellcc/libecc/patches/musl.revision > $dest
 # root
-file='root-'$"ARCH'.tar.lz'
-$FETCH 'https://downloads.eltan.in.net/files/root/'$"file
+file='root-'$"HOSTARCH'.tar.lz'
+$FETCH https://downloads.eltan.in.net/files/root/$HOSTOS/$file
 $UNLZ $file | $UNTAR
 mkdir -p etc/ssl/certs
 cp /etc/ssl/certs/ca-certificates.crt etc/ssl/certs }
@@ -93,7 +92,7 @@ tmpdir=`{mktemp -d}
 @{ cd $tmpdir
 git clone https://github.com/sabotage-linux/kernel-headers
 @{ cd kernel-headers
-make ARCH=$ARCH prefix=/ DESTDIR=$destdir install } }
+make ARCH'='$HOSTARCH prefix'='/ DESTDIR'='$destdir install } }
 rm -Rf $tmpdir
 
 msg building glacies
@@ -103,7 +102,7 @@ $SU mount -t proc none proc
 $SU mount -o bind /sys sys
 $SU mount -o bind /dev dev }
 
-$SU env PATH=/bin chroot workdir /bin/rc <<EOF
+$SU env PATH'='/bin chroot workdir /bin/rc <<EOF
 	@{ cd mnt
 	mkdir bin boot dev etc home include lib libexec \
 	      media mnt opt proc share run src srv sys var
@@ -128,6 +127,6 @@ msg finishing glacies build
 @{ cd workdir
 $SU umount dev proc sys
 cd mnt
-$SU env PATH=/bin chroot . glacies-install.rc }
+$SU env PATH'='/bin chroot . glacies-install.rc }
 
 msg done
