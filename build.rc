@@ -145,6 +145,7 @@ $SU env PATH'='/bin chroot workdir /bin/rc <<EOF
 	PORTS='/ports/'
 	/ports/mk/portsys.rc install -e / -r /mnt `{cat '/pkgset'}
 	cp -R root/* mnt
+	chmod +t mnt/etc/perp/*
 	printf 'arch:%s\n' `{uname -m} >> mnt/etc/venus.conf
 	cp -R bin/glacies-install.rc mnt/bin
 EOF
