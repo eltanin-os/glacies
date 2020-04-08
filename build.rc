@@ -1,16 +1,42 @@
 #!/bin/rc -e
 
 #
+# trap
+#
+
+fn sigexit {
+	@{ mount workdir/mnt/dev
+	mount workdir/mnt/proc
+	mount workdir/mnt/sys } || true
+}
+
+#
 # io routines
 #
 
+# $* : msg
 fn die {
 	echo $progname : '<error>' $* >[1=2]
 	exit 1
 }
 
+# $* : msg
 fn msg {
 	echo $progname : '<message>' $*
+}
+
+#
+# fetch routines
+#
+
+# $1 : url
+fn fetch {
+	if (! test -e `{basename $1}) $FETCH $1
+}
+
+# $1 : url
+fn gitclone {
+	if (! test -e `{basename $1 .git}) git clone $1
 }
 
 #
@@ -66,7 +92,7 @@ pwd=`{pwd}
 destdir=$"pwd'/workdir'
 @{ cd workdir
 # ports
-git clone https://git.tuxfamily.org/eltaninos/ports.git
+gitclone https://git.tuxfamily.org/eltaninos/ports.git
 tmp=`{mktemp}
 sed -e 's;^AR=.*;AR=/ellcc/bin/ecc-ar;g' \
     -e 's;^CC=.*;CC=/ellcc/bin/ecc;g' \
@@ -76,21 +102,21 @@ sed -e 's;^AR=.*;AR=/ellcc/bin/ecc-ar;g' \
 mv $tmp ports/mk/config.rc
 # ellcc
 file='ellcc-'$"HOSTARCH'-linux-2017-08-23.bz2'
-$FETCH http://ellcc.org/releases/latest/$file
+fetch http://ellcc.org/releases/latest/$file
 @{ $UNBZ2 $"file | $UNTAR } || true # false bzip2 error
 mkdir -p mnt/var/pkg/local
 dest='mnt/var/pkg/local/libc-dev'
 awk '{ print "version:" $2 "-" $1 }' ellcc/libecc/patches/musl.revision > $dest
 # root
 file='root-'$"HOSTARCH'.tar.lz'
-$FETCH https://downloads.eltan.in.net/files/root/$HOSTOS/$file
+fetch https://downloads.eltan.in.net/files/root/$HOSTOS/$file
 $UNLZ $file | $UNTAR
 mkdir -p etc/ssl/certs
 cp /etc/ssl/certs/ca-certificates.crt etc/ssl/certs }
 
 tmpdir=`{mktemp -d}
 @{ cd $tmpdir
-git clone https://github.com/sabotage-linux/kernel-headers
+gitclone https://github.com/sabotage-linux/kernel-headers
 @{ cd kernel-headers
 make ARCH'='$HOSTARCH prefix'='/ DESTDIR'='$destdir install } }
 rm -Rf $tmpdir
