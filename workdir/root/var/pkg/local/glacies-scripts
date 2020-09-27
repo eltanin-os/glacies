@@ -1,9 +1,10 @@
-# name: glacies-scripts
-# version: 0.3.0
-# license: UNLICENSE
-# description: Eltanin Glacies scripts.
-# size: 6547
-files:
-	bin/sysfetch 4726757476 2624
-	bin/mkinitramfs 32347141173 3175
-	bin/magus 32413226302 526
+name:glacies-scripts
+version:current
+license:UNLICENSE
+description:Eltanin Glacies scripts.
+size:14
+files{
+	bin/magus 698d5bf4
+	bin/mkinitramfs 4e9335dc
+	bin/sysfetch baa6e4d2
+}

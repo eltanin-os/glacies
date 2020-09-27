@@ -6,8 +6,8 @@ fn usage {
 }
 
 fn setup {
-	if (! test -f /etc/sets/$"1) exit 1
-	exec env -i PORTS=$"PORTS /etc/sets/$"1 setup
+	if (! test -f /etc/sets/$1) exit 1
+	exec env -i PORTS'='$"PORTS /etc/sets/$1 setup
 }
 
 if (test -z $"PORTS) {

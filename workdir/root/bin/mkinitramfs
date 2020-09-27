@@ -12,21 +12,21 @@ fn sigexit {
 }
 
 fn fhbuild @{
-	cd $"1
+	cd $1
 	mkdir -p etc/default bin dev lib/firmware run sys proc tmp
 	ln -s . usr
 	ln -s bin sbin
 }
 
 fn filesbuild @{
-	cd $"1
+	cd $1
 	touch etc/fstab
 	files=`{venus -l files ccore ecore kmod rc ubase | tr ' ' '\n' | egrep -v 'man[0-9]|include'}
 	for (f in $files) cp -f /$f $f
 }
 
 fn modbuild @{
-	cd $"1
+	cd $1
 	find /lib/modules/$"kversion/kernel/crypto             \
 	    /lib/modules/$"kversion/kernel/fs                  \
 	    /lib/modules/$"kversion/kernel/lib                 \
@@ -44,13 +44,13 @@ fn modbuild @{
 }
 
 fn initbuild @{
-	cd $"1
+	cd $1
 	install -m 0755 /etc/init.in $"tmpdir/init
 	find . | cpio -H newc -o | pigz -9
 }
 
 if (test $#* -gt 1) usage
-kversion=$"1
+kversion=$1
 if (~ $"kversion) kversion=`{uname -r}
 
 if (! test -d /lib/modules/$"kversion) {

@@ -1,5 +1,5 @@
 #!/bin/rc
-if (! ~ $"1 start) exit
-dev=/dev/`{printf '%s' $"2 | cut -d @ -f 2}
+if (! ~ $1 start) exit
+dev=/dev/`{printf '%s' $2 | cut -d @ -f 2}
 cat /etc/issue >$dev >[2]/dev/null
 exec getty $dev

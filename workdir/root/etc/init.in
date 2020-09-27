@@ -18,15 +18,15 @@ modprobe -aq $aliases
 cmdline=`{cat /proc/cmdline}
 for (cmd in $cmdline) {
 	switch ($cmd) {
-	case init=*
+	case init'='*
 		eval $cmd
-	case root=*
+	case root'='*
 		eval $cmd
-	case rootdelay=*
+	case rootdelay'='*
 		eval $cmd
-	case rootfstype=*
+	case rootfstype'='*
 		eval $cmd
-	case rootflags=*
+	case rootflags'='*
 		eval $cmd
 	case ro
 		ro=ro
@@ -42,10 +42,10 @@ rootflags=$"rootflags$"ro
 switch ($root) {
 case /dev/*
 	device=$"root
-case UUID=*
+case UUID'='*
 	eval $root
 	device=/dev/disk/by-uuid/$"UUID
-case LABEL=*
+case LABEL'='*
 	eval $root
 	device=/dev/disk/by-label/$"LABEL
 }

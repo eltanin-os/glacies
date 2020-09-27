@@ -1,9 +1,9 @@
 #!/bin/rc
 
 if (~ $#* 0) *=(start perpd)
-if (! ~ $"1 start ) exit
+if (! ~ $1 start ) exit
 
-logdir=/var/log/$"2
+logdir=/var/log/$2
 
 if (! test -d $logdir) {
 	mkdir $logdir
