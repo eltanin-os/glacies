@@ -5,9 +5,10 @@
 #
 
 fn sigexit {
-	@{ mount workdir/mnt/dev
-	mount workdir/mnt/proc
-	mount workdir/mnt/sys } || true
+	@{ cd workdir
+	$SU umount ./dev
+	$SU umount ./proc
+	$SU umount ./sys } >[2]/dev/null ||;
 }
 
 #
@@ -92,7 +93,10 @@ pwd=`{pwd}
 destdir=$"pwd'/workdir'
 @{ cd workdir
 # ports
-gitclone https://git.tuxfamily.org/eltaninos/ports.git
+gitclone https://git.eltan.in.net/ports
+@{ cd ports/pkg
+gitclone https://git.eltan.in.net/posix-repo
+gitclone https://git.eltan.in.net/linux-repo }
 tmp=`{mktemp}
 sed -e 's;^AR=.*;AR=/ellcc/bin/ecc-ar;g' \
     -e 's;^CC=.*;CC=/ellcc/bin/ecc;g' \
@@ -103,7 +107,7 @@ mv $tmp ports/mk/config.rc
 # ellcc
 file='ellcc-'$"HOSTARCH'-linux-2017-08-23.bz2'
 fetch http://ellcc.org/releases/latest/$file
-@{ $UNBZ2 $"file | $UNTAR } || true # false bzip2 error
+@{ $UNBZ2 $file | $UNTAR } ||; # false bzip2 error
 mkdir -p mnt/var/pkg/local
 dest='mnt/var/pkg/local/libc-dev'
 awk '{ print "version:" $2 "-" $1 }' ellcc/libecc/patches/musl.revision > $dest
@@ -114,12 +118,28 @@ $UNLZ $file | $UNTAR
 mkdir -p etc/ssl/certs
 cp /etc/ssl/certs/ca-certificates.crt etc/ssl/certs }
 
-tmpdir=`{mktemp -d}
-@{ cd $tmpdir
+# bootstrap ports
+@{ tmpdir=`{mktemp -d}
+cd $tmpdir
+. $destdir/ports/mk/config.rc
+@{ gitclone https://git.eltan.in.net/tertium
+cd tertium
+make CC'='$"destdir$"CC CFLAGS'='$"CFLAGS CPPFLAGS'='$"CPPFLAGS \
+    LDFLAGS'='$"LDFLAGS PREFIX'='/ DESTDIR'='$"tmpdir install }
+@{ cd $destdir/ports/mk/bin/code
+CPPFLAGS=($CPPFLAGS -I$tmpdir/include)
+LDFLAGS=($LDFLAGS -L$tmpdir/lib)
+make CC'='$"destdir$"CC CFLAGS'='$"CFLAGS CPPFLAGS'='$"CPPFLAGS \
+    LDFLAGS'='$"LDFLAGS bootstrap }
+rm -Rf $tmpdir }
+
+# install kernel headers
+@{ tmpdir=`{mktemp -d}
+cd $tmpdir
 gitclone https://github.com/sabotage-linux/kernel-headers
 @{ cd kernel-headers
-make ARCH'='$HOSTARCH prefix'='/ DESTDIR'='$destdir install } }
-rm -Rf $tmpdir
+make ARCH'='$HOSTARCH prefix'='/ DESTDIR'='$destdir install }
+rm -Rf $tmpdir }
 
 msg building glacies
 @{ cd workdir
@@ -140,13 +160,13 @@ $SU env PATH'='/bin chroot workdir /bin/rc <<EOF
 	mkdir cache local remote }
 	ln -s . usr
 	ln -s bin sbin
-	ln -s dash bin/sh
-	chmod 0600 etc/shadow }
+	ln -s dash bin/sh }
 	PORTS='/ports/'
-	/ports/mk/portsys.rc install -e / -r /mnt `{cat '/pkgset'}
+	/ports/mk/portsys.rc install -BMu -e / -r /mnt `{cat '/pkgset'}
 	cp -R root/* mnt
+	chmod 0600 mnt/etc/shadow
 	chmod +t mnt/etc/perp/*
-	printf 'arch:%s\n' `{uname -m} >> mnt/etc/venus.conf
+	printf 'arch:%s\n' $HOSTARCH >> mnt/etc/venus.conf
 	cp -R bin/glacies-install.rc mnt/bin
 EOF
 
