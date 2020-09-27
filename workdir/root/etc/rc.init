@@ -6,6 +6,7 @@ mount -nt proc  none /proc
 mount -o remount,rw /
 
 mount -nt devtmpfs none /dev
+ln -s /proc/self/fd /dev/fd
 mkdir /dev/pts
 mount -nt devpts none /dev/pts
 mkdir /dev/shm
