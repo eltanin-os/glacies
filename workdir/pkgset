@@ -4,6 +4,7 @@ ccore
 clzip
 curl
 dash
+dhcpcd
 ecore
 iproute2
 kmod
