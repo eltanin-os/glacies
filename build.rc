@@ -97,20 +97,19 @@ gitclone https://git.eltan.in.net/ports
 @{ cd ports/pkg
 gitclone https://git.eltan.in.net/posix-repo
 gitclone https://git.eltan.in.net/linux-repo }
+# ports config
+file=$"HOSTARCH'-linux-musl-native'
 tmp=`{mktemp}
-sed -e 's;^AR=.*;AR=/ellcc/bin/ecc-ar;g' \
-    -e 's;^CC=.*;CC=/ellcc/bin/ecc;g' \
-    -e 's;^CXX=.*;CXX=/ellcc/bin/ecc++;g' \
-    -e 's;^RANLIB=.*;RANLIB=/ellcc/bin/ecc-ranlib;g' \
-    -e 's;^STRIP=.*;STRIP=/ellcc/bin/ecc-strip;g' ports/mk/config.rc > $tmp
+sed -e 's;^AR=.*;AR=/'$"file'/bin/ar;g' \
+    -e 's;^CC=.*;CC=(/'$"file'/bin/gcc -static);g' \
+    -e 's;^RANLIB=.*;RANLIB=/'$"file'/bin/ranlib;g' \
+    -e 's;^STRIP=.*;STRIP=/'$"file'/bin/strip;g' ports/mk/config.rc > $tmp
 mv $tmp ports/mk/config.rc
-# ellcc
-file='ellcc-'$"HOSTARCH'-linux-2017-08-23.bz2'
-fetch http://ellcc.org/releases/latest/$file
-@{ $UNBZ2 $file | $UNTAR } ||; # false bzip2 error
-mkdir -p mnt/var/pkg/local
-dest='mnt/var/pkg/local/libc-dev'
-awk '{ print "version:" $2 "-" $1 }' ellcc/libecc/patches/musl.revision > $dest
+# compiler
+file=$"file'.tgz'
+fetch 'http://musl.cc/'$"file
+$UNGZ $file | $UNTAR
+echo 'version:git-0b06402' > root/var/pkg/local/libc-dev
 # root
 file='root-'$"HOSTARCH'.tar.lz'
 fetch https://downloads.eltan.in.net/files/root/$HOSTOS/$file
@@ -161,11 +160,11 @@ $SU env PATH'='/bin chroot workdir /bin/rc <<EOF
 	ln -s . usr
 	ln -s bin sbin
 	ln -s dash bin/sh }
+	{ cp -R root/* mnt
+	chmod 0600 mnt/etc/shadow
+	chmod +t mnt/etc/perp/* }
 	PORTS='/ports/'
 	/ports/mk/portsys.rc install -BMu -e / -r /mnt `{cat '/pkgset'}
-	cp -R root/* mnt
-	chmod 0600 mnt/etc/shadow
-	chmod +t mnt/etc/perp/*
 	printf 'arch:%s\n' $HOSTARCH >> mnt/etc/venus.conf
 	cp -R bin/glacies-install.rc mnt/bin
 EOF
