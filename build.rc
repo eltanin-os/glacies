@@ -46,7 +46,7 @@ fn gitclone {
 
 # $1 : tool
 fn search {
-	@{ for (p in $path) if (test -f $"p/$1) exit 0 }
+	@{ for (p in $path) if (test -f $p/$1) exit 0 } ||;
 }
 
 # $1 : tool
@@ -62,9 +62,7 @@ fn trydep {
 			echo $args
 			exit 0
 		}
-		tools=' '^$args(1)
-	}}
-	if (! ~ $status 0) die '"'$*'"' : not found
+	}} || die '"'$*'"' : not found
 }
 
 #
@@ -73,8 +71,8 @@ fn trydep {
 
 progname=`{basename $0}
 SU=`{trydep 'doas' 'sudo' 'su -c'}
-m=`{$SU /bin/rc -c 'umask'}
-if (! ~ $m 022 && ! ~ $m 22) die $SU umask must be 022
+m=`{$SU /bin/sh -c 'umask' | sed 's;^0*;;g'}
+if (! ~ $m 22) die $SU umask must be 022
 
 HOSTARCH=`{uname -m}
 tolower=`{trydep 'awk {print(tolower($0))}' 'tr [A-Z] [a-z]'}
@@ -170,9 +168,7 @@ $SU env PATH'='/bin chroot workdir /bin/rc <<EOF
 EOF
 
 msg finishing glacies build
-@{ cd workdir
-$SU umount dev proc sys
-cd mnt
+@{ cd workdir/mnt
 $SU env PATH'='/bin chroot . glacies-install.rc }
 
 msg done
