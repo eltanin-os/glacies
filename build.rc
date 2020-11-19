@@ -88,7 +88,7 @@ searchfail make
 
 msg preparing temporary build environment
 pwd=`{pwd}
-destdir=$"pwd'/workdir'
+destdir=$"pwd/workdir
 @{ cd workdir
 # ports
 gitclone https://git.eltan.in.net/ports
@@ -96,7 +96,7 @@ gitclone https://git.eltan.in.net/ports
 gitclone https://git.eltan.in.net/posix-repo
 gitclone https://git.eltan.in.net/linux-repo }
 # ports config
-file=$"HOSTARCH'-linux-musl-native'
+file=$HOSTARCH-linux-musl-native
 tmp=`{mktemp}
 sed -e 's;^AR=.*;AR=/'$"file'/bin/ar;g' \
     -e 's;^CC=.*;CC=(/'$"file'/bin/gcc -static);g' \
@@ -104,31 +104,17 @@ sed -e 's;^AR=.*;AR=/'$"file'/bin/ar;g' \
     -e 's;^STRIP=.*;STRIP=/'$"file'/bin/strip;g' ports/mk/config.rc > $tmp
 mv $tmp ports/mk/config.rc
 # compiler
-file=$"file'.tgz'
-fetch 'http://musl.cc/'$"file
+file=$file.tgz
+fetch http://musl.cc/$file
 $UNGZ $file | $UNTAR
-echo 'version:git-0b06402' > root/var/pkg/local/libc-dev
-# root
-file='root-'$"HOSTARCH'.tar.lz'
-fetch https://downloads.eltan.in.net/files/root/$HOSTOS/$file
+$SU mkdir -p mnt/var/pkg/local
+echo 'version:git-0b06402' | $SU tee mnt/var/pkg/local/libc-dev
+# build core
+file=buildcore-$HOSTARCH.tar.lz
+fetch http://downloads.eltan.in.net/files/buildcore/$HOSTOS/$file
 $UNLZ $file | $UNTAR
 mkdir -p etc/ssl/certs
 cp /etc/ssl/certs/ca-certificates.crt etc/ssl/certs }
-
-# bootstrap ports
-@{ tmpdir=`{mktemp -d}
-cd $tmpdir
-. $destdir/ports/mk/config.rc
-@{ gitclone https://git.eltan.in.net/tertium
-cd tertium
-make CC'='$"destdir$"CC CFLAGS'='$"CFLAGS CPPFLAGS'='$"CPPFLAGS \
-    LDFLAGS'='$"LDFLAGS PREFIX'='/ DESTDIR'='$"tmpdir install }
-@{ cd $destdir/ports/mk/bin/code
-CPPFLAGS=($CPPFLAGS -I$tmpdir/include)
-LDFLAGS=($LDFLAGS -L$tmpdir/lib)
-make CC'='$"destdir$"CC CFLAGS'='$"CFLAGS CPPFLAGS'='$"CPPFLAGS \
-    LDFLAGS'='$"LDFLAGS bootstrap }
-rm -Rf $tmpdir }
 
 # install kernel headers
 @{ tmpdir=`{mktemp -d}
@@ -152,23 +138,26 @@ $SU env PATH'='/bin chroot workdir /bin/rc <<EOF
 	mkdir -m 0750 root
 	mkdir -m 1777 tmp
 	@{ cd var
-	mkdir empty lib lock log pkg run spool }
+	mkdir db empty lib lock log pkg run spool }
 	@{ cd var/pkg
 	mkdir cache local remote }
 	ln -s . usr
 	ln -s bin sbin
-	ln -s dash bin/sh }
-	{ cp -R root/* mnt
-	chmod 0600 mnt/etc/shadow
-	chmod +t mnt/etc/perp/* }
+	ln -s dash bin/sh
+	# copy base files
+	pigz -dc ../opt/base.tgz | pax -r
+	chmod 0600 etc/shadow
+	chmod +t etc/perp/* }
 	PORTS='/ports/'
+	# bootstrap ports
+	@{ cd /ports/mk/bin/code
+	./bootstrap.rc }
 	/ports/mk/portsys.rc install -BMu -e / -r /mnt `{cat '/pkgset'}
 	printf 'arch:%s\n' $HOSTARCH >> mnt/etc/venus.conf
 	cp -R bin/glacies-install.rc mnt/bin
 EOF
 
 msg finishing glacies build
-@{ cd workdir/mnt
-$SU env PATH'='/bin chroot . glacies-install.rc }
+$SU env PATH'='/bin chroot workdir/mnt glacies-install.rc
 
 msg done
