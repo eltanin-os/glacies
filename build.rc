@@ -96,19 +96,15 @@ gitclone https://git.eltan.in.net/ports
 gitclone https://git.eltan.in.net/posix-repo
 gitclone https://git.eltan.in.net/linux-repo }
 # ports config
-file=$HOSTARCH-linux-musl-native
 tmp=`{mktemp}
-sed -e 's;^AR=.*;AR=/'$"file'/bin/ar;g' \
-    -e 's;^CC=.*;CC=(/'$"file'/bin/gcc -static);g' \
-    -e 's;^RANLIB=.*;RANLIB=/'$"file'/bin/ranlib;g' \
-    -e 's;^STRIP=.*;STRIP=/'$"file'/bin/strip;g' ports/mk/config.rc > $tmp
+sed 's;^CC=.*;CC=(gcc -static);g' ports/mk/config.rc > $tmp
 mv $tmp ports/mk/config.rc
 # compiler
-file=$file.tgz
-fetch http://musl.cc/$file
+file=$HOSTARCH-linux-musl-native.tgz
+fetch http://more.musl.cc/9/$HOSTARCH-linux-musl/$file
 $UNGZ $file | $UNTAR
 $SU mkdir -p mnt/var/pkg/local
-echo 'version:git-0b06402' | $SU tee mnt/var/pkg/local/libc-dev
+echo 'version:git-821083a' | $SU tee mnt/var/pkg/local/libc-dev
 # build core
 file=buildcore-$HOSTARCH.tar.lz
 fetch http://downloads.eltan.in.net/files/buildcore/$HOSTOS/$file
@@ -131,7 +127,8 @@ $SU mount -t proc none proc
 $SU mount -o bind /sys sys
 $SU mount -o bind /dev dev }
 
-$SU env PATH'='/bin chroot workdir /bin/rc <<EOF
+$SU chroot workdir /bin/rc <<EOF
+	PATH=/bin:/$HOSTARCH-linux-musl-native/bin
 	@{ cd mnt
 	mkdir bin boot dev etc home include lib libexec \
 	      media mnt opt proc share run src srv sys var
