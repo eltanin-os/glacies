@@ -5,9 +5,9 @@ Glacies is an operating system, composed from the
 [Eltanin](https://eltan.in.net) userpace.
 
 ### Build
-[Build Process](https://eltan.in.net/?wiki/glacies_build)
+[Build Process](https://eltan.in.net/distros/glacies/build)
 
 ### Support
-[Support](https://eltan.in.net/?support/index)
+[Support](https://eltan.in.net/support)
 
 Linux® is the registered trademark of Linus Torvalds in the U.S. and other countries.
