@@ -3,7 +3,6 @@ ca-certificates
 ccore
 clzip
 curl
-dash
 dhcpcd
 ecore
 iproute2
@@ -11,6 +10,7 @@ kmod
 libressl
 mandoc
 mdevd
+mksh
 ncurses
 neatvi
 perp
@@ -18,5 +18,6 @@ pigz
 rc
 sinit
 ubase
+util-linux
 venus
 xz

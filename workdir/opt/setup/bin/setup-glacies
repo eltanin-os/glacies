@@ -1,0 +1,38 @@
+#!/bin/rc -e
+argv0=$0
+
+fn msg {
+	echo $argv0: '<message>' $*
+}
+
+msg preparing filesystem hier
+@{ cd /mnt
+mkdir bin boot dev etc home include lib libexec \
+      media mnt opt proc share run src srv sys var
+mkdir -m 0750 root
+mkdir -m 1777 tmp
+@{ cd var
+mkdir db empty lib lock log pkg run spool }
+@{ cd var/pkg
+mkdir cache local remote }
+ln -s . usr
+ln -s bin sbin
+ln -s lksh bin/sh
+# copy base files
+@{ cd /opt/base
+pax -rw . /mnt }
+chmod 0600 etc/shadow
+chmod +t etc/perp/* }
+
+msg installing packages
+if (test -d /var/pkg/disk) {
+	venus -Ne /var/pkg/disk/*
+}; if not {
+	venus -u
+	venus -a `{cat /opt/pkg/base} linux linux-dev
+}
+
+msg generating fstab
+swaps=`{cat /proc/swaps | cut -d' ' -f1 | tail -n+2}
+printf '%s none swap sw 0 0\n' $swaps > /mnt/etc/fstab
+grep '/mnt' /proc/mounts | sed 's;/mnt;/;g' >> /mnt/etc/fstab

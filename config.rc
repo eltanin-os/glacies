@@ -1,0 +1,13 @@
+# number of cores utilized during the build
+nprocs=2
+
+# base : the default system
+# dev  : ports deps
+pkgset=(base)
+
+# install ports? (true/false)
+# if true add "dev" to pkgset
+ports=false
+
+# pretend to create a livecd? (true/false)
+livecd=false

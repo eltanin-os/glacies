@@ -1,0 +1,11 @@
+root:x:0:
+kvm:x:1:
+tty:x:2:
+uucp:x:3:
+disk:x:4:
+cdrom:x:5:
+floppy:x:6:
+audio:x:7:
+video:x:8:
+input:x:9:
+log:x:100:

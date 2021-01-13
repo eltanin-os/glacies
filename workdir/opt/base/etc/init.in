@@ -1,0 +1,59 @@
+#!/bin/rc
+
+path=/bin
+init=/etc/rc.init
+root=''
+rootdelay=''
+ro=ro
+rootflags=''
+device=''
+
+mount -nt devtmpfs none /dev
+mount -nt proc     none /proc
+mount -nt sysfs    none /sys
+
+aliases=`{find /sys -type f -name 'modalias' -exec cat '{}' + | sort -u}
+modprobe -aq $aliases
+
+cmdline=`{cat /proc/cmdline}
+for (cmd in $cmdline) {
+	switch ($cmd) {
+	case init'='*
+		eval $cmd
+	case root'='*
+		eval $cmd
+	case rootdelay'='*
+		eval $cmd
+	case rootfstype'='*
+		eval $cmd
+	case rootflags'='*
+		eval $cmd
+	case ro
+		ro=ro
+	case rw
+		rw=rw
+	}
+}
+
+mkdir /.root
+if (test -n $"rootflags) rootflags=$"rootflags,
+rootflags=$"rootflags$"ro
+
+switch ($root) {
+case /dev/*
+	device=$"root
+case UUID'='*
+	eval $root
+	device=/dev/disk/by-uuid/$"UUID
+case LABEL'='*
+	eval $root
+	device=/dev/disk/by-label/$"LABEL
+}
+
+mount -nt $"rootfstype -o $"rootflags $"device /.root
+
+umount /dev
+umount /proc
+umount /sys
+
+exec switch_root /.root $"init $*

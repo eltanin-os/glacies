@@ -1,0 +1,28 @@
+#!/bin/rc
+#
+mount -nt sysfs none /sys
+mount -nt proc  none /proc
+
+mount -o remount,rw /
+
+mount -nt devtmpfs none /dev
+ln -s /proc/self/fd /dev/fd
+mkdir /dev/pts
+mount -nt devpts none /dev/pts
+mkdir /dev/shm
+mount -nt tmpfs  none /dev/shm
+
+mount -a
+swapon -a
+
+hostname `{cat /etc/hostname}
+ip link set lo up
+dmesg >/var/log/dmesg.log
+
+/etc/rc.local
+
+modules=`{cat /etc/modules}
+if (! ~ $#modules 0) modprobe -aq $modules
+
+. /etc/profile
+exec perpboot /etc/perp

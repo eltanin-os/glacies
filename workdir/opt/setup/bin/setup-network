@@ -1,0 +1,4 @@
+#!/bin/rc -e
+# TODO: Handle ethX and wlanX
+mkdir -p /etc/ssl/certs ||;
+update-ca-certificates --fresh

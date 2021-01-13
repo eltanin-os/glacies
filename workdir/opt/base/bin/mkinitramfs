@@ -1,0 +1,66 @@
+#!/bin/rc -e
+
+argv0=$0
+
+fn usage {
+	printf 'usage: %s [version]\n' $argv0 >[1=2]
+	exit 1
+}
+
+fn sigexit {
+	rm -Rf $tmpdir
+}
+
+fn fhbuild @{
+	mkdir -p etc/default bin dev lib/firmware run sys proc tmp
+	ln -s . usr
+	ln -s bin sbin
+}
+
+fn filesbuild @{
+	touch etc/fstab
+	files=`{venus -l files ccore ecore kmod rc ubase}
+	for (f in $files) {
+		mkdir -p `{dirname $f} >[2]/dev/null ||;
+		cp -f /$f $f
+	}
+}
+
+fn modbuild @{
+	find /lib/modules/$kversion/kernel/crypto             \
+	    /lib/modules/$kversion/kernel/fs                  \
+	    /lib/modules/$kversion/kernel/lib                 \
+	    /lib/modules/$kversion/kernel/drivers/block       \
+	    /lib/modules/$kversion/kernel/drivers/ata         \
+	    /lib/modules/$kversion/kernel/drivers/md          \
+	    /lib/modules/$kversion/kernel/drivers/firewire    \
+	    /lib/modules/$kversion/kernel/drivers/usb/host    \
+	    /lib/modules/$kversion/kernel/drivers/usb/storage \
+	    /lib/modules/$kversion/kernel/drivers/scsi        \
+	    -type f >[2]/dev/null | cpio -p -d .
+	cp /lib/modules/$kversion/modules.builtin lib/modules/$kversion
+	cp /lib/modules/$kversion/modules.order lib/modules/$kversion
+	depmod -b . $kversion
+}
+
+fn initbuild @{
+	install -m 0755 /etc/init.in $tmpdir/init
+	find . | cpio -o -H newc | pigz -9
+}
+
+if (test $#* -gt 1) usage
+kversion=$1
+if (~ $kversion) kversion=`{uname -r}
+
+if (! test -d /lib/modules/$kversion) {
+	printf '%s: <error> no module directory named %s\n' \
+	    $argv0 $kversion >[1=2]
+	exit 1
+}
+
+tmpdir=`{mktemp -d}
+cd $tmpdir
+fhbuild
+filesbuild
+modbuild
+initbuild > /boot/initramfs-$kversion

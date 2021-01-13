@@ -9,6 +9,10 @@ fn sigexit {
 	$SU umount ./dev
 	$SU umount ./proc
 	$SU umount ./sys } >[2]/dev/null ||;
+	@{ cd workdir/mnt
+	$SU umount ./dev
+	$SU umount ./proc
+	$SU umount ./sys } >[2]/dev/null ||;
 }
 
 #
@@ -66,6 +70,11 @@ fn trydep {
 }
 
 #
+# import
+#
+. ./config.rc
+
+#
 # main
 #
 
@@ -97,7 +106,8 @@ gitclone https://git.eltan.in.net/posix-repo
 gitclone https://git.eltan.in.net/linux-repo }
 # ports config
 tmp=`{mktemp}
-sed 's;^CC=.*;CC=(gcc -static);g' ports/mk/config.rc > $tmp
+sed -e 's;^CC=.*;CC=(gcc -static);g' \
+    -e 's;nprocs=.*;nprocs='$"nprocs';g' ports/mk/config.rc > $tmp
 mv $tmp ports/mk/config.rc
 # compiler
 file=$HOSTARCH-linux-musl-native.tgz
@@ -140,21 +150,39 @@ $SU chroot workdir /bin/rc <<EOF
 	mkdir cache local remote }
 	ln -s . usr
 	ln -s bin sbin
-	ln -s dash bin/sh
+	ln -s lksh bin/sh
 	# copy base files
-	pigz -dc ../opt/base.tgz | pax -r
+	@{ cd /opt/base
+	pax -rw . /mnt }
 	chmod 0600 etc/shadow
 	chmod +t etc/perp/* }
 	PORTS='/ports/'
 	# bootstrap ports
 	@{ cd /ports/mk/bin/code
 	./bootstrap.rc }
-	/ports/mk/portsys.rc install -BMu -e / -r /mnt `{cat '/pkgset'}
+	if ($ports) cp -R /ports /mnt
+	/ports/mk/portsys.rc install -BMu -e / -r /mnt `{cat /opt/pkg/$pkgset}
 	printf 'arch:%s\n' $HOSTARCH >> mnt/etc/venus.conf
-	cp -R bin/glacies-install.rc mnt/bin
 EOF
 
+if ($livecd) {
+	msg preparing livecd files
+	@{ cd workdir/opt/setup
+	pax -rw . workdir/mnt }
+}
+
 msg finishing glacies build
-$SU env PATH'='/bin chroot workdir/mnt glacies-install.rc
+@{ cd workdir/mnt
+$SU mount -t proc none proc
+$SU mount -o bind /sys sys
+$SU mount -o bind /dev dev }
+
+$SU chroot workdir/mnt /bin/rc <<EOF
+	mkdir -p /etc/ssl/certs ||;
+	update-ca-certificates --fresh
+	venus -u
+	venus -a linux
+	mkinitramfs `{ls /lib/modules}
+EOF
 
 msg done

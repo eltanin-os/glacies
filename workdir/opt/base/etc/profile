@@ -1,0 +1,10 @@
+PATH=/bin
+PORTS=/ports
+MANPATH=/share/man
+XDG_RUNTIME_DIR=/tmp
+PKG_CONFIG=/bin/pkgconf
+
+PERP_BASE=/etc/perp
+PERP_CTL=/var/run/perp
+
+PS1='$ '

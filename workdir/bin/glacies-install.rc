@@ -1,6 +1,0 @@
-#!/bin/rc
-mkdir -p etc/ssl/certs
-update-ca-certificates --fresh
-venus -u
-venus -a linux
-mkinitramfs `{ls /lib/modules}

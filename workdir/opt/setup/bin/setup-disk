@@ -1,0 +1,42 @@
+#!/bin/rc -e
+argv0=$0
+
+fn err {
+	echo $argv0: '<error>' $* >[1=2]
+	exit 1
+}
+
+fn msg {
+	echo $argv0: '<message>' $*
+}
+
+msg choose a disk or done:
+lsblk -d | awk '/disk/ {print $1" "$4}'
+disks=`{lsblk -d | awk '/disk/ {print $1}'}
+@{ while () {
+	d=`{head -n1}
+	if (~ $d done) exit
+	cfdisk $d
+} }
+
+msg choose the mount points:
+msg root (/):
+root=`{head -n1}
+if (test -z $root) err root point not given
+msg boot (/boot):
+boot=`{head -n1}
+if (test -z $boot) err boot point not given
+msg swap (swap):
+swap=`{head -n1}
+if (test -z $swap) err swap point not given
+
+msg preparing devices filesystem...
+mkfs.ext4 -f $root
+mkfs.ext2 -f $boot
+mkswap -f $swap
+
+msg mounting devices...
+mount -t ext4 $root /mnt
+mkdir /mnt/boot
+mount -t ext2 $boot /mnt/boot
+swapon $swap
