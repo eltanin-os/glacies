@@ -1,6 +1,16 @@
 #!/bin/rc -e
+argv0=$0
 
+fn msg {
+	echo $argv0: '<message>' $*
+}
+
+msg starting setup-disk...
 setup-disk
+msg starting setup-network...
 setup-network
+msg starting setup-glacies...
 setup-glacies
-setup-kernel
+msg execute setup-bootloader? (yes/no)
+answer=`{head -n1}
+if (~ $answer yes) setup-bootloader

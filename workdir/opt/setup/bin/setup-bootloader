@@ -1,0 +1,33 @@
+#!/bin/rc -e
+argv0=$0
+
+fn err {
+	echo $argv0: '<error>' $* >[1=2]
+	exit 1
+}
+
+fn msg {
+	echo $argv0: '<message>' $*
+}
+
+root=`{mount | awk '/\/mnt/ { print $1 }'}
+boot=`{echo $root | sed 's/[0-9]*$//g'}
+if (test -z $boot) err no device found at /mnt
+
+message installing syslinux...
+mkdir -p /mnt/boot/syslinux
+extlinux --install /mnt/boot/syslinux
+dd if=/usr/lib/syslinux/mbr.bin of=$boot bs=440
+
+message setting bootloader...
+version=`{ls /lib/modules | tail -n1} # XXX
+cat <<EOF >/mnt/boot/syslinux/syslinux.cfg
+	PROMPT 1
+	TIMEOUT 50
+	DEFAULT glacies
+
+	LABEL glacies
+		LINUX ../vmlinuz-$version
+		APPEND root=$root rootfstype=ext4 quiet
+		INITRD ../initramfs-$version
+EOF

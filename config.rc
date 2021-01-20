@@ -1,8 +1,9 @@
 # number of cores utilized during the build
 nprocs=2
 
-# base : the default system
-# dev  : ports deps
+# base   : the default system
+# dev    : ports deps
+# livecd : livecd deps
 pkgset=(base)
 
 # install ports? (true/false)
@@ -10,4 +11,5 @@ pkgset=(base)
 ports=false
 
 # pretend to create a livecd? (true/false)
+# if true add "livecd" to pkgset
 livecd=false

@@ -35,4 +35,4 @@ if (test -d /var/pkg/disk) {
 msg generating fstab
 swaps=`{cat /proc/swaps | cut -d' ' -f1 | tail -n+2}
 printf '%s none swap sw 0 0\n' $swaps > /mnt/etc/fstab
-grep '/mnt' /proc/mounts | sed 's;/mnt;/;g' >> /mnt/etc/fstab
+awk '/\/mnt/ { gsub(/\/mnt/, "/"); print $0 }' /proc/mounts >> /mnt/etc/fstab
