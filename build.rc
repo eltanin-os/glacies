@@ -73,6 +73,7 @@ fn trydep {
 # import
 #
 . ./config.rc
+pkgset=`{cat workdir/opt/pkg/$pkgset}
 
 #
 # main
@@ -132,7 +133,7 @@ rm -Rf $tmpdir }
 
 msg building glacies
 @{ cd workdir
-mkdir dev proc sys tmp
+mkdir dev proc sys tmp ||;
 $SU mount -t proc none proc
 $SU mount -o bind /sys sys
 $SU mount -o bind /dev dev }
@@ -161,14 +162,14 @@ $SU chroot workdir /bin/rc <<EOF
 	@{ cd /ports/mk/bin/code
 	./bootstrap.rc }
 	if ($ports) cp -R /ports /mnt
-	/ports/mk/portsys.rc install -BMu -e / -r /mnt `{cat /opt/pkg/$pkgset}
+	/ports/mk/portsys.rc install -BMu -e / -r /mnt $pkgset
 	printf 'arch:%s\n' $HOSTARCH >> mnt/etc/venus.conf
 EOF
 
 if ($livecd) {
 	msg preparing livecd files
 	@{ cd workdir/opt/setup
-	pax -rw . workdir/mnt }
+	pax -rw . ../mnt }
 }
 
 msg finishing glacies build
