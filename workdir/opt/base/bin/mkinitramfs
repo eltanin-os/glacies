@@ -1,5 +1,4 @@
 #!/bin/rc -e
-
 argv0=$0
 
 fn usage {
@@ -19,7 +18,7 @@ fn fhbuild @{
 
 fn filesbuild @{
 	touch etc/fstab
-	files=`{venus -l files ccore ecore kmod rc ubase}
+	files=`{venus -l files ccore ecore kmod rc ubase util-linux}
 	for (f in $files) {
 		mkdir -p `{dirname $f} >[2]/dev/null ||;
 		cp -f /$f $f
@@ -29,14 +28,15 @@ fn filesbuild @{
 fn modbuild @{
 	find /lib/modules/$kversion/kernel/crypto             \
 	    /lib/modules/$kversion/kernel/fs                  \
-	    /lib/modules/$kversion/kernel/lib                 \
-	    /lib/modules/$kversion/kernel/drivers/block       \
 	    /lib/modules/$kversion/kernel/drivers/ata         \
-	    /lib/modules/$kversion/kernel/drivers/md          \
+	    /lib/modules/$kversion/kernel/drivers/block       \
+	    /lib/modules/$kversion/kernel/drivers/cdrom       \
 	    /lib/modules/$kversion/kernel/drivers/firewire    \
+	    /lib/modules/$kversion/kernel/drivers/md          \
+	    /lib/modules/$kversion/kernel/drivers/scsi        \
 	    /lib/modules/$kversion/kernel/drivers/usb/host    \
 	    /lib/modules/$kversion/kernel/drivers/usb/storage \
-	    /lib/modules/$kversion/kernel/drivers/scsi        \
+	    /lib/modules/$kversion/kernel/lib                 \
 	    -type f >[2]/dev/null | cpio -p -d .
 	cp /lib/modules/$kversion/modules.builtin lib/modules/$kversion
 	cp /lib/modules/$kversion/modules.order lib/modules/$kversion
@@ -48,9 +48,14 @@ fn initbuild @{
 	find . | cpio -o -H newc | pigz -9
 }
 
-if (test $#* -gt 1) usage
-kversion=$1
-if (~ $kversion) kversion=`{uname -r}
+switch ($#*) {
+case 0
+	kversion=`{uname -r}
+case 1
+	kversion=$1
+case *
+	usage
+}
 
 if (! test -d /lib/modules/$kversion) {
 	printf '%s: <error> no module directory named %s\n' \

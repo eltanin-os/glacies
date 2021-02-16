@@ -16,21 +16,6 @@ fn sigexit {
 }
 
 #
-# io routines
-#
-
-# $* : msg
-fn die {
-	echo $progname : '<error>' $* >[1=2]
-	exit 1
-}
-
-# $* : msg
-fn msg {
-	echo $progname : '<message>' $*
-}
-
-#
 # fetch routines
 #
 
@@ -45,34 +30,10 @@ fn gitclone {
 }
 
 #
-# misc routines
-#
-
-# $1 : tool
-fn search {
-	@{ for (p in $path) if (test -f $p/$1) exit 0 } ||;
-}
-
-# $1 : tool
-fn searchfail {
-	search $1 || die $1: not found
-}
-
-# $* : tool, args
-fn trydep {
-	@{ for (tool in $*) {
-		args=`{echo $tool}
-		search $args && {
-			echo $args
-			exit 0
-		}
-	}} || die '"'$*'"' : not found
-}
-
-#
 # import
 #
-. ./config.rc
+. ./mk/common.rc
+. ./mk/config.rc
 pkgset=`{cat workdir/opt/pkg/$pkgset}
 
 #
@@ -153,8 +114,7 @@ $SU chroot workdir /bin/rc <<EOF
 	ln -s bin sbin
 	ln -s lksh bin/sh
 	# copy base files
-	@{ cd /opt/base
-	pax -rw . /mnt }
+	cp -R /opt/base/* /mnt
 	chmod 0600 etc/shadow
 	chmod +t etc/perp/* }
 	PORTS='/ports/'
@@ -168,8 +128,7 @@ EOF
 
 if ($livecd) {
 	msg preparing livecd files
-	@{ cd workdir/opt/setup
-	pax -rw . ../mnt }
+	$SU cp -R workdir/opt/setup/* workdir/mnt
 }
 
 msg finishing glacies build
@@ -182,7 +141,7 @@ $SU chroot workdir/mnt /bin/rc <<EOF
 	mkdir -p /etc/ssl/certs ||;
 	update-ca-certificates --fresh
 	venus -u
-	venus -a linux
+	venus -a linux linux-headers-dev
 	mkinitramfs `{ls /lib/modules}
 EOF
 

@@ -1,0 +1,41 @@
+#!/bin/rc -e
+
+#
+# io routines
+#
+
+# $* : msg
+fn die {
+	echo $progname : '<error>' $* >[1=2]
+	exit 1
+}
+
+# $* : msg
+fn msg {
+	echo $progname : '<message>' $*
+}
+
+#
+# misc routines
+#
+
+# $1 : tool
+fn search {
+	@{ for (p in $path) if (test -f $p/$1) exit 0 } ||;
+}
+
+# $1 : tool
+fn searchfail {
+	search $1 || die $1: not found
+}
+
+# $* : tool, args
+fn trydep {
+	@{ for (tool in $*) {
+		args=`{echo $tool}
+		search $args && {
+			echo $args
+			exit 0
+		}
+	}} || die '"'$*'"' : not found
+}

@@ -8,9 +8,9 @@ ro=ro
 rootflags=''
 device=''
 
-mount -nt devtmpfs none /dev
-mount -nt proc     none /proc
-mount -nt sysfs    none /sys
+mount -nt devtmpfs devtmpfs /dev
+mount -nt proc     proc     /proc
+mount -nt sysfs    sysfs    /sys
 
 aliases=`{find /sys -type f -name 'modalias' -exec cat '{}' + | sort -u}
 modprobe -aq $aliases
@@ -51,9 +51,6 @@ case LABEL'='*
 }
 
 mount -nt $"rootfstype -o $"rootflags $"device /.root
-
-umount /dev
-umount /proc
-umount /sys
+umount /dev /proc /sys
 
 exec switch_root /.root $"init $*

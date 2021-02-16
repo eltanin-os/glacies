@@ -4,6 +4,10 @@ license:UNLICENSE
 description:Eltanin Glacies scripts.
 size:10
 files{
-	bin/mkinitramfs 9abc61f3
+	bin/mkinitramfs 63bb3fc2
 	bin/sysfetch baa6e4d2
+}
+rdeps{
+	coreutils#*
+	rc#*
 }

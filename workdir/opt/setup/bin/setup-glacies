@@ -25,12 +25,8 @@ chmod 0600 etc/shadow
 chmod +t etc/perp/* }
 
 msg installing packages
-if (test -d /var/pkg/disk) {
-	venus -Ne /var/pkg/disk/*
-}; if not {
-	venus -u
-	venus -a `{cat /opt/pkg/base} linux linux-dev
-}
+venus -u
+venus -a `{cat /opt/pkg/base} linux linux-headers-dev
 
 msg generating fstab
 swaps=`{cat /proc/swaps | cut -d' ' -f1 | tail -n+2}

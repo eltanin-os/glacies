@@ -1,7 +1,7 @@
 #!/bin/rc -e
 argv0=$0
 
-fn err {
+fn die {
 	echo $argv0: '<error>' $* >[1=2]
 	exit 1
 }
@@ -22,13 +22,13 @@ disks=`{lsblk -d | awk '/disk/ {print $1}'}
 msg choose the mount points:
 msg root (/):
 root=`{head -n1}
-if (test -z $root) err root point not given
+if (test -z $root) die root point not given
 msg boot (/boot):
 boot=`{head -n1}
-if (test -z $boot) err boot point not given
+if (test -z $boot) die boot point not given
 msg swap (swap):
 swap=`{head -n1}
-if (test -z $swap) err swap point not given
+if (test -z $swap) die swap point not given
 
 msg preparing devices filesystem...
 mkfs.ext4 -f $root

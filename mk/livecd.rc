@@ -1,0 +1,78 @@
+#!/bin/rc -e
+
+#
+# include
+#
+
+. ./mk/common.rc
+
+#
+# main
+#
+
+progname=`{basename $0}
+GENISO=`{trydep 'mkisofs -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -joliet -R -o output.iso' 'xorriso -as mkisofs -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -joliet -R -o output.iso'}
+SU=`{trydep 'doas' 'sudo' 'su -c'}
+
+searchfail mksquashfs
+
+tmpfile=`{mktemp}
+cat <<EOF >$tmpfile
+#!/bin/rc
+path=/bin
+init=/etc/rc.init
+
+mount -nt devtmpfs devtmpfs /dev
+mount -nt proc     proc     /proc
+mount -nt sysfs    sysfs    /sys
+
+aliases=`{find /sys -type f -name 'modalias' -exec cat '{}' + | sort -u}
+modprobe -aq $aliases
+
+mkdir -p .root /mnt/device /mnt/image
+mount -nt iso9660 -o ro /dev/sr0 /mnt/device
+losetup /dev/loop0 /mnt/device/image.squashfs
+mount -nt squashfs -o ro /dev/loop0 /mnt/image
+mount -nt tmpfs none /.root
+echo copying system to ram...
+cp -R /mnt/image/* /.root
+
+
+umount /mnt/image
+losetup -d /dev/loop0
+umount /mnt/device /dev /proc /sys
+
+exec switch_root /.root $$init $*
+EOF
+
+$SU mv $tmpfile workdir/mnt/etc/init.in
+$SU rm -f workdir/mnt/var/pkg/cache/*
+kversion=`{ls workdir/mnt/lib/modules}
+$SU chroot workdir/mnt /bin/mkinitramfs $kversion
+$SU mv workdir/mnt/boot livecd
+$SU mksquashfs workdir/mnt livecd/image.squashfs -comp xz
+
+$SU mkdir livecd/isolinux
+tmpfile=`{mktemp}
+cat <<EOF >$tmpfile
+DEFAULT glacies
+PROMPT 0
+
+LABEL glacies
+	KERNEL /boot/vmlinuz-$kversion
+	APPEND initrd=/boot/initramfs-$kversion
+EOF
+
+$SU mv $tmpfile livecd/isolinux/isolinux.cfg
+
+if (test -d /usr/lib/syslinux/) {
+	files=(isolinux.bin ldlinux.c32)
+	$SU cp /usr/lib/syslinux/$files livecd/isolinux
+}
+if not {
+	files=`{find /lib/ -type f ( -name 'ldlinux.c32' -o -name 'isolinux.bin' )} >[2]/dev/null
+	if (! ~ $#files 2) die ldlinux.c32 or isolinux.bin not found.
+	$SU cp $files livecd/isolinux
+}
+
+$SU $GENISO livecd
