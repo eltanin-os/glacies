@@ -5,6 +5,7 @@ clzip
 curl
 dhcpcd
 ecore
+heirloom-doctools
 iproute2
 kmod
 libressl
