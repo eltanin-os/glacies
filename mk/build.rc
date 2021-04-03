@@ -73,10 +73,10 @@ sed -e 's;^CC=.*;CC=(gcc -static);g' \
 mv $tmp ports/mk/config.rc
 # compiler
 file=$HOSTARCH-linux-musl-native.tgz
-fetch http://more.musl.cc/9/$HOSTARCH-linux-musl/$file
+fetch http://musl.cc/$file
 $UNGZ $file | $UNTAR
 $SU mkdir -p mnt/var/pkg/local
-echo 'version:git-821083a' | $SU tee mnt/var/pkg/local/libc-dev
+echo 'version:git-e5d2823' | $SU tee mnt/var/pkg/local/libc-dev
 # build core
 file=buildcore-$HOSTARCH.tar.lz
 fetch http://downloads.eltan.in.net/files/buildcore/$HOSTOS/$file
