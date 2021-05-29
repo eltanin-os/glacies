@@ -68,9 +68,9 @@ gitclone https://git.eltan.in.net/posix-repo
 gitclone https://git.eltan.in.net/linux-repo }
 # ports config
 tmp=`{mktemp}
-sed -e 's;^CC=.*;CC=(gcc -static);g' \
-    -e 's;nprocs=.*;nprocs='$"nprocs';g' ports/mk/config.rc > $tmp
-mv $tmp ports/mk/config.rc
+sed -e 's;^CC=.*;CC=''gcc -static'';g' \
+    -e 's;nprocs=.*;nprocs='$"nprocs';g' ports/mk/config > $tmp
+mv $tmp ports/mk/config
 # compiler
 file=$HOSTARCH-linux-musl-native.tgz
 fetch http://musl.cc/$file
@@ -122,7 +122,7 @@ $SU chroot workdir /bin/rc <<EOF
 	@{ cd /ports/mk/bin/code
 	./bootstrap.rc }
 	if ($ports) cp -R /ports /mnt
-	/ports/mk/portsys.rc install -BMu -e / -r /mnt $pkgset
+	/ports/mk/portsys install -BMu -e / -r /mnt $pkgset
 	printf 'arch:%s\n' $HOSTARCH >> mnt/etc/venus.conf
 EOF
 
