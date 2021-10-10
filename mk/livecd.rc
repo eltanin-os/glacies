@@ -11,7 +11,9 @@
 #
 
 progname=`{basename $0}
-GENISO=`{trydep 'mkisofs -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -joliet -R -o output.iso' 'xorriso -as mkisofs -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -joliet -R -o output.iso'}
+
+mo='-b boot/limine-cd.bin -no-emul-boot -boot-load-size 4 -boot-info-table --protective-msdos-label -o output.iso'
+GENISO=`{trydep 'mkisofs '$"mo 'xorriso -as mkisofs '$"mo}
 SU=`{trydep 'doas' 'sudo' 'su -c'}
 
 searchfail mksquashfs
@@ -25,54 +27,61 @@ init=/etc/rc.init
 mount -nt devtmpfs devtmpfs /dev
 mount -nt proc     proc     /proc
 mount -nt sysfs    sysfs    /sys
+mount -nt tmpfs    none     /run
 
 aliases=`{find /sys -type f -name 'modalias' -exec cat '{}' + | sort -u}
-modprobe -aq $aliases
+modprobe -aq $$aliases usb-storage
 
-mkdir -p .root /mnt/device /mnt/image
-mount -nt iso9660 -o ro /dev/sr0 /mnt/device
-losetup /dev/loop0 /mnt/device/image.squashfs
-mount -nt squashfs -o ro /dev/loop0 /mnt/image
-mount -nt tmpfs none /.root
-echo copying system to ram...
-cp -R /mnt/image/* /.root
+d=`{lsblk -f | grep 'ISOIMAGE' | cut -f1 -d' '}
+if (test -z $$"d) {
+	echo '<warning> device not found' >[1=2]
+	echo '<message> waiting for device...'
+	@{ while (true) {
+		sleep 1
+		d=`{lsblk -f | grep 'ISOIMAGE' | cut -f1 -d' '}
+		if (test -n $$"d) exit 0
+	} }
+}
 
+d=`{lsblk -f | grep 'ISOIMAGE' | cut -f1 -d' '}
+mkdir /run/device
+mount -nt iso9660 -o ro /dev/$$"d /run/device
+losetup /dev/loop0 /run/device/image.squashfs
 
-umount /mnt/image
-losetup -d /dev/loop0
-umount /mnt/device /dev /proc /sys
+mkdir /run/image
+mount -nt squashfs -o ro /dev/loop0 /run/image
 
-exec switch_root /.root $$init $*
+mkdir /.root /run/upper /run/work
+mount -nt overlay -o 'lowerdir=/run/image,upperdir=/run/upper,workdir=/run/work' none /.root
+
+umount /dev /proc /sys
+
+exec switch_root /.root $$init $$*
 EOF
 
+$SU mv workdir/mnt/etc/init.in workdir/mnt/etc/init.in.backup
 $SU mv $tmpfile workdir/mnt/etc/init.in
-$SU rm -f workdir/mnt/var/pkg/cache/*
+
 kversion=`{ls workdir/mnt/lib/modules}
 $SU chroot workdir/mnt /bin/mkinitramfs $kversion
-$SU mv workdir/mnt/boot livecd
+cp -R workdir/mnt/boot livecd
+$SU rm -f workdir/mnt/var/pkg/remote/cache/*
 $SU mksquashfs workdir/mnt livecd/image.squashfs -comp xz
 
-$SU mkdir livecd/isolinux
+$SU mv workdir/mnt/etc/init.in.backup workdir/mnt/etc/init.in
+
 tmpfile=`{mktemp}
 cat <<EOF >$tmpfile
-DEFAULT glacies
-PROMPT 0
-
-LABEL glacies
-	KERNEL /boot/vmlinuz-$kversion
-	APPEND initrd=/boot/initramfs-$kversion
+:Eltanin Glacies
+PROTOCOL=linux
+KERNEL_PATH=boot:///boot/vmlinuz-$kversion
+CMDLINE=quiet
+MODULE_PATH=boot:///boot/initramfs-$kversion
 EOF
 
-$SU mv $tmpfile livecd/isolinux/isolinux.cfg
-
-if (test -d /usr/lib/syslinux/) {
-	files=(isolinux.bin ldlinux.c32)
-	$SU cp /usr/lib/syslinux/$files livecd/isolinux
-}
-if not {
-	files=`{find /lib/ -type f ( -name 'ldlinux.c32' -o -name 'isolinux.bin' )} >[2]/dev/null
-	if (! ~ $#files 2) die ldlinux.c32 or isolinux.bin not found.
-	$SU cp $files livecd/isolinux
-}
-
+mv $tmpfile livecd/boot/limine.cfg
+cp workdir/mnt/usr/share/limine/limine.sys livecd/boot
+cp workdir/mnt/usr/share/limine/limine-cd.bin livecd/boot
+cp workdir/mnt/usr/share/limine/limine-eltorito-efi.bin livecd/boot
 $SU $GENISO livecd
+$SU workdir/mnt/bin/limine-install output.iso

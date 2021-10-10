@@ -18,7 +18,7 @@ fn fhbuild @{
 
 fn filesbuild @{
 	touch etc/fstab
-	files=`{venus -l files ccore ecore kmod rc ubase util-linux}
+	files=`{venus -l files ccore ecore kmod rc ubase util-linux | cut -d' ' -f2}
 	for (f in $files) {
 		mkdir -p `{dirname $f} >[2]/dev/null ||;
 		cp -f /$f $f

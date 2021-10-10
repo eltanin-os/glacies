@@ -22,11 +22,13 @@ fn sigexit {
 # $1 : url
 fn fetch {
 	if (! test -e `{basename $1}) $FETCH $1
+	true
 }
 
 # $1 : url
 fn gitclone {
 	if (! test -e `{basename $1 .git}) git clone $1
+	true
 }
 
 #
@@ -49,7 +51,6 @@ HOSTARCH=`{uname -m}
 tolower=`{trydep 'awk {print(tolower($0))}' 'tr [A-Z] [a-z]'}
 HOSTOS=`{uname -s | $tolower}
 FETCH=`{trydep 'curl -LO' 'wget'}
-UNGZ=`{trydep 'pigz -dc' 'gzip -dc'}
 UNLZ=`{trydep 'lzip -dc' 'clzip -dc' 'pdlzip -dc'}
 UNTAR=`{trydep 'pax -r' 'tar -x' 'bsdtar -x'}
 UNBZ2=`{trydep 'bzip2 -dc'}
@@ -69,17 +70,18 @@ gitclone https://git.eltan.in.net/linux-repo }
 # ports config
 tmp=`{mktemp}
 sed -e 's;^CC=.*;CC=''gcc -static'';g' \
-    -e 's;nprocs=.*;nprocs='$"nprocs';g' ports/mk/config > $tmp
-mv $tmp ports/mk/config
+    -e 's;^LDFLAGS=.*;LDFLAGS=-static;g' \
+    -e 's;nprocs=.*;nprocs='$"nprocs';g' ports/mk/config.rc > $tmp
+mv $tmp ports/mk/config.rc
 # compiler
-file=$HOSTARCH-linux-musl-native.tgz
-fetch http://musl.cc/$file
-$UNGZ $file | $UNTAR
+file=$HOSTARCH-linux-musl-native.tar.lz
+fetch http://downloads.eltan.in.net/bin/$HOSTOS/$file
+$UNLZ $file | $UNTAR
 $SU mkdir -p mnt/var/pkg/local
-echo 'version:git-e5d2823' | $SU tee mnt/var/pkg/local/libc-dev
+echo 'version:1.2.2' | $SU tee mnt/var/pkg/local/libc-dev
 # build core
-file=buildcore-$HOSTARCH.tar.lz
-fetch http://downloads.eltan.in.net/files/buildcore/$HOSTOS/$file
+file=$HOSTARCH-buildcore.tar.lz
+fetch http://downloads.eltan.in.net/bin/$HOSTOS/$file
 $UNLZ $file | $UNTAR
 mkdir -p etc/ssl/certs
 cp /etc/ssl/certs/ca-certificates.crt etc/ssl/certs }
@@ -99,6 +101,8 @@ $SU mount -t proc none proc
 $SU mount -o bind /sys sys
 $SU mount -o bind /dev dev }
 
+$SU cp /etc/resolv.conf workdir/etc
+
 $SU chroot workdir /bin/rc <<EOF
 	PATH=/bin:/$HOSTARCH-linux-musl-native/bin
 	@{ cd mnt
@@ -109,7 +113,7 @@ $SU chroot workdir /bin/rc <<EOF
 	@{ cd var
 	mkdir db empty lib lock log pkg run spool }
 	@{ cd var/pkg
-	mkdir cache local remote }
+	mkdir -p local remote/cache }
 	ln -s . usr
 	ln -s bin sbin
 	ln -s lksh bin/sh
@@ -122,14 +126,17 @@ $SU chroot workdir /bin/rc <<EOF
 	@{ cd /ports/mk/bin/code
 	./bootstrap.rc }
 	if ($ports) cp -R /ports /mnt
-	/ports/mk/portsys install -BMu -e / -r /mnt $pkgset
-	printf 'arch:%s\n' $HOSTARCH >> mnt/etc/venus.conf
+	/ports/mk/portsys.rc install -BMu -e / -r /mnt $pkgset
+	printf 'arch:%s\n' $HOSTARCH >> mnt/etc/venus.cfg
+	cp etc/resolv.conf mnt/etc
 EOF
 
 if ($livecd) {
 	msg preparing livecd files
 	$SU cp -R workdir/opt/setup/* workdir/mnt
 }
+
+if ($ports) dev='linux-dev'
 
 msg finishing glacies build
 @{ cd workdir/mnt
@@ -141,7 +148,7 @@ $SU chroot workdir/mnt /bin/rc <<EOF
 	mkdir -p /etc/ssl/certs ||;
 	update-ca-certificates --fresh
 	venus -u
-	venus -a linux linux-headers-dev
+	venus -ay linux $dev
 	mkinitramfs `{ls /lib/modules}
 EOF
 

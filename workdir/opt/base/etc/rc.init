@@ -8,9 +8,9 @@ mount -o remount,rw /
 mount -nt devtmpfs none /dev
 ln -s /proc/self/fd /dev/fd
 mkdir /dev/pts
-mount -nt devpts none /dev/pts
+mount -nt devpts devpts /dev/pts
 mkdir /dev/shm
-mount -nt tmpfs  none /dev/shm
+mount -nt tmpfs tmpfs /dev/shm
 
 mount -a
 swapon -a

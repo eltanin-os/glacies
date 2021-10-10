@@ -26,7 +26,7 @@ chmod +t etc/perp/* }
 
 msg installing packages
 venus -u
-venus -a `{cat /opt/pkg/base} linux linux-headers-dev
+venus -ay `{cat /opt/pkg/base} linux
 
 msg generating fstab
 swaps=`{cat /proc/swaps | cut -d' ' -f1 | tail -n+2}

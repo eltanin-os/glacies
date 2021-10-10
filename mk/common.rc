@@ -21,7 +21,12 @@ fn msg {
 
 # $1 : tool
 fn search {
-	@{ for (p in $path) if (test -f $p/$1) exit 0 } ||;
+	found=false
+	for (p in $path) {
+		if (test -f $p/$1) found=true
+		true
+	}
+	$found ||;
 }
 
 # $1 : tool
