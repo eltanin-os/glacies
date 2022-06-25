@@ -80,8 +80,8 @@ MODULE_PATH=boot:///boot/initramfs-$kversion
 EOF
 
 mv $tmpfile livecd/boot/limine.cfg
-cp workdir/mnt/usr/share/limine/limine.sys livecd/boot
-cp workdir/mnt/usr/share/limine/limine-cd.bin livecd/boot
-cp workdir/mnt/usr/share/limine/limine-eltorito-efi.bin livecd/boot
+BOOTDIR=$PWD/livecd/boot
+@{ cd workdir/mnt/usr/share/limine
+cp limine.sys limine-cd.bin limine-cd-efi.bin $BOOTDIR }
 $SU $GENISO livecd
-$SU workdir/mnt/bin/limine-install output.iso
+$SU workdir/mnt/bin/limine-deploy output.iso

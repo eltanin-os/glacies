@@ -1,0 +1,6 @@
+name:posix-core
+version:current
+rdeps{
+ecore#*
+ccore#*
+}

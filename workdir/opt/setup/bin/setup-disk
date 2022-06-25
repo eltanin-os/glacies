@@ -10,13 +10,14 @@ fn msg {
 	echo $argv0: '<message>' $*
 }
 
-msg choose a disk or done:
+msg is necessary to create root '(>=150M)', boot '(>=50)' and swap partitions.
 lsblk -d | awk '/disk/ {print $1" "$4}'
 disks=`{lsblk -d | awk '/disk/ {print $1}'}
 @{ while () {
+	msg choose a disk or done:
 	d=`{head -n1}
 	if (~ $d done) exit
-	cfdisk $d
+	cfdisk /dev/$d
 } }
 
 msg choose the mount points:
@@ -31,8 +32,8 @@ swap=`{head -n1}
 if (test -z $swap) die swap point not given
 
 msg preparing devices filesystem...
-mkfs.ext4 -f $root
-mkfs.ext2 -f $boot
+mkfs.ext4 -F $root
+mkfs.ext2 -F $boot
 mkswap -f $swap
 
 msg mounting devices...

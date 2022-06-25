@@ -63,25 +63,25 @@ pwd=`{pwd}
 destdir=$"pwd/workdir
 @{ cd workdir
 # ports
-gitclone https://git.eltan.in.net/ports
+gitclone https://git.eltaninos.org/ports
 @{ cd ports/pkg
-gitclone https://git.eltan.in.net/posix-repo
-gitclone https://git.eltan.in.net/linux-repo }
+gitclone https://git.eltaninos.org/posix-repo
+gitclone https://git.eltaninos.org/linux-repo }
 # ports config
 tmp=`{mktemp}
-sed -e 's;^CC=.*;CC=''gcc -static'';g' \
+sed -e 's;^CC=.*;CC=''gcc'';g' \
     -e 's;^LDFLAGS=.*;LDFLAGS=-static;g' \
     -e 's;nprocs=.*;nprocs='$"nprocs';g' ports/mk/config.rc > $tmp
 mv $tmp ports/mk/config.rc
 # compiler
 file=$HOSTARCH-linux-musl-native.tar.lz
-fetch http://downloads.eltan.in.net/bin/$HOSTOS/$file
+fetch http://downloads.eltaninos.org/repo/binaries/$file
 $UNLZ $file | $UNTAR
 $SU mkdir -p mnt/var/pkg/local
-echo 'version:1.2.2' | $SU tee mnt/var/pkg/local/libc-dev
+$SU cp var/pkg/local/libc-dev mnt/var/pkg/local
 # build core
 file=$HOSTARCH-buildcore.tar.lz
-fetch http://downloads.eltan.in.net/bin/$HOSTOS/$file
+fetch http://downloads.eltaninos.org/repo/binaries/$file
 $UNLZ $file | $UNTAR
 mkdir -p etc/ssl/certs
 cp /etc/ssl/certs/ca-certificates.crt etc/ssl/certs }
@@ -127,7 +127,7 @@ $SU chroot workdir /bin/rc <<EOF
 	./bootstrap.rc }
 	if ($ports) cp -R /ports /mnt
 	/ports/mk/portsys.rc install -BMu -e / -r /mnt $pkgset
-	printf 'arch:%s\n' $HOSTARCH >> mnt/etc/venus.cfg
+	printf 'arch:%s\n' $HOSTARCH >> mnt/etc/venus.conf
 	cp etc/resolv.conf mnt/etc
 EOF
 
@@ -136,7 +136,7 @@ if ($livecd) {
 	$SU cp -R workdir/opt/setup/* workdir/mnt
 }
 
-if ($ports) dev='linux-dev'
+if ($ports) dev='linux-headers'
 
 msg finishing glacies build
 @{ cd workdir/mnt

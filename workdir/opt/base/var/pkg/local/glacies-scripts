@@ -2,12 +2,12 @@ name:glacies-scripts
 version:current
 license:UNLICENSE
 description:Eltanin Glacies scripts.
-size:3600
+size:3569
 files{
-	e0a5e3c1 bin/mkinitramfs
-	3edf5b27 bin/sysfetch
+./bin/mkinitramfs:be92e383
+./bin/sysfetch:275bdf3e
 }
 rdeps{
-	coreutils#*
-	rc#*
+posix-core#*
+rc#*
 }

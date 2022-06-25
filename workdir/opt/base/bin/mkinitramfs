@@ -18,11 +18,8 @@ fn fhbuild @{
 
 fn filesbuild @{
 	touch etc/fstab
-	files=`{venus -l files ccore ecore kmod rc ubase util-linux | cut -d' ' -f2}
-	for (f in $files) {
-		mkdir -p `{dirname $f} >[2]/dev/null ||;
-		cp -f /$f $f
-	}
+	files=`{venus -l files ccore ecore kmod rc ubase util-linux | cut -d':' -f1}
+	for (f in $files) install -D /$f $f
 }
 
 fn modbuild @{
@@ -58,8 +55,7 @@ case *
 }
 
 if (! test -d /lib/modules/$kversion) {
-	printf '%s: <error> no module directory named %s\n' \
-	    $argv0 $kversion >[1=2]
+	echo $argv0': <error> no module directory named '$kversion >[1=2]
 	exit 1
 }
 
