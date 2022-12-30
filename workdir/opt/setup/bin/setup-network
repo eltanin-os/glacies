@@ -1,6 +1,0 @@
-#!/bin/rc -e
-ethX=`{ls -d /sys/class/net/eth*}
-for (net in $ethX) dhcpcd $net
-# wlanX=`{ls -d /sys/class/net/wlan*} # XXX
-mkdir -p /etc/ssl/certs ||;
-update-ca-certificates --fresh

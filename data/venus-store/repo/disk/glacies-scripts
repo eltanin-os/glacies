@@ -1,0 +1,8 @@
+name:glacies-scripts
+version:20221229
+license:UNLICENSE
+description:Eltanin Glacies scripts.
+size:3482
+rundeps{
+system-core
+}

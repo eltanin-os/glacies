@@ -1,5 +1,0 @@
-#!/bin/rc
-if (! ~ $1 start) exit
-if (! perpok mdevd) exit
-mdevd-coldplug
-exec runpause 0 true

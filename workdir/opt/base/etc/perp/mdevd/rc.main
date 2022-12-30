@@ -1,4 +1,0 @@
-#!/bin/rc
-if (! ~ $1 start) exit
-runpause 2 mdevd-coldplug & # XXX
-exec mdevd

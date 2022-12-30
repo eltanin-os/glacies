@@ -1,0 +1,59 @@
+#!/bin/execlineb -P
+envfile mk/env.conf
+backtick tmpdir { mktemp -d }
+multisubstitute {
+	importas -isu SU SU
+	importas -iu tmpdir tmpdir
+	define PROGRAMS "build/mnt/venus-store/programs"
+}
+# IMAGE
+if {
+	if { $SU cp data/init.in build/mnt/etc/init.in }
+	backtick -Ex kversion { ls ${PROGRAMS}/linux/lib/modules }
+	$SU chroot build/mnt
+	    if { s6-linux-init-maker -1nc /etc/s6/current tmp/s6.tmp }
+	    if { rm -Rf etc/s6/current }
+	    if { mv tmp/s6.tmp etc/s6/current }
+	    if {
+	    	elglob files "/etc/s6/current/bin/*"
+	    	cp -PRp $files sbin
+	    }
+	    /bin/mkinitramfs $kversion
+}
+if { $SU mksquashfs build/mnt ${tmpdir}/image.squashfs -comp xz }
+# BOOT
+if {
+	if { mkdir -p ${tmpdir}/boot }
+	backtick -Ex kversion { ls ${PROGRAMS}/linux/lib/modules }
+	heredoc 0
+":Eltanin Glacies
+PROTOCOL=linux
+KERNEL_PATH=boot:///boot/vmlinuz-${kversion}
+CMDLINE=quiet
+MODULE_PATH=boot:///boot/initramfs-${kversion}
+"
+	redirfd -w 1 ${tmpdir}/boot/limine.cfg
+	cat
+
+}
+if { cp -R build/mnt/boot $tmpdir }
+if {
+	cd ${PROGRAMS}/limine-bin/share/limine
+	cp limine-cd.bin limine-cd-efi.bin limine.sys ${tmpdir}/boot
+}
+# ISO
+if {
+	xorriso -as mkisofs
+	-b boot/limine-cd.bin
+	-no-emul-boot
+	-boot-load-size 4
+	-boot-info-table
+	--efi-boot boot/limine-cd-efi.bin
+	-efi-boot-part
+	--efi-boot-image
+	--protective-msdos-label
+	-o output.iso
+	$tmpdir
+}
+if { build/mnt/venus-store/programs/limine-bin/bin/limine-deploy output.iso }
+rm -Rf $tmpdir

@@ -1,0 +1,45 @@
+#!/bin/execlineb -S0
+# LIVECD INIT.IN
+if { mount -nt devtmpfs devtmpfs /dev }
+if { mount -nt proc proc /proc }
+if { mount -nt tmpfs run /run }
+if { mount -nt sysfs sysfs /sys }
+foreground {
+	backtick aliases {
+		pipeline { find /sys -type f -name "modalias" -exec cat "{}" + }
+		sort -u
+	}
+	importas -isu aliases aliases
+	modprobe -aq $aliases
+}
+if {
+	backtick -Ex dev { pipeline { lsblk -f } awk "/ISOIMAGE/ {print $1}" }
+	if -t { test -z $dev }
+	foreground {
+		fdmove 1 2
+		foreground { echo "<warning> device not found" }
+		echo "<message> waiting for device..."
+	}
+	loopwhilex
+	backtick -Ex dev { pipeline { lsblk -f } awk "/ISOIMAGE/ {print $1}" }
+	test -n $dev
+}
+if { mkdir -p /run/device }
+if {
+	backtick -Ex dev { pipeline { lsblk -f } awk "/ISOIMAGE/ {print $1}" }
+	mount -nt iso9660 -o ro /dev/${dev} /run/device
+}
+if { losetup /dev/loop0 /run/device/image.squashfs }
+if { mkdir -p /run/image }
+if { mount -nt squashfs -o ro /dev/loop0 /run/image }
+if { mkdir -p /.root /run/upper /run/work }
+if { mount -nt overlay -o "lowerdir=/run/image,upperdir=/run/upper,workdir=/run/work" none /.root }
+if {
+	backtick -xED "eltanin-glacies" hostname { cat .root/etc/hostname }
+	hostname $hostname
+}
+if { mount -o move /dev .root/dev }
+if { mount -o move /proc .root/proc }
+if { mount -o move /run .root/run }
+if { mount -o move /sys .root/sys }
+switch_root .root /sbin/init $@

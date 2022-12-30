@@ -1,8 +1,6 @@
 # Glacies
 
-Glacies is an operating system, composed of the
-[Linux®](https://www.kernel.org) kernel and the
-[Eltanin](https://eltaninos.org) userpace.
+Glacies is an operating system, composed of the [Linux®](https://www.kernel.org) kernel and the [Eltanin](https://eltaninos.org) userpace.
 
 ### Build
 [Build Process](https://eltaninos.org/distros/glacies/build)
