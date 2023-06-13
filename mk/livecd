@@ -44,16 +44,16 @@ if {
 # ISO
 if {
 	xorriso -as mkisofs
-	-b boot/limine-cd.bin
-	-no-emul-boot
-	-boot-load-size 4
-	-boot-info-table
-	--efi-boot boot/limine-cd-efi.bin
-	-efi-boot-part
-	--efi-boot-image
-	--protective-msdos-label
-	-o output.iso
-	$tmpdir
+	    -b boot/limine-cd.bin
+	    -no-emul-boot
+	    -boot-load-size 4
+	    -boot-info-table
+	    --efi-boot boot/limine-cd-efi.bin
+	    -efi-boot-part
+	    --efi-boot-image
+	    --protective-msdos-label
+	    -o output.iso
+	    $tmpdir
 }
 if { build/mnt/venus-store/programs/limine-bin/bin/limine-deploy output.iso }
 rm -Rf $tmpdir
