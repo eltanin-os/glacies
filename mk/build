@@ -21,74 +21,77 @@ if {
 }
 if {
 	cd build
-	# prepare compiler
+	# clone arbor
 	if { git clone https://git.eltaninos.org/arbor }
-	if { $FETCH http://ellcc.org/releases/latest/ellcc-${HOSTARCH}-linux-2017-08-23.bz2 } # XXX
-	if { pipeline { $UNBZ2 ellcc-${HOSTARCH}-linux-2017-08-23.bz2 } $UNTAR }
 	getcwd PWD
 	multisubstitute {
 		importas -i PWD PWD
 		importas -i PATH PATH
 	}
-	# build kernel headers
-	if {
-		if { git clone https://github.com/sabotage-linux/kernel-headers }
-		cd kernel-headers
-		make ARCH=$HOSTARCH prefix=/ DESTDIR=$PWD install
-	}
-	# build chroot environment
+	# build glacies environment
 	export ARBOR "${PWD}/arbor"
-	export PATH "${PWD}/ellcc/bin:${PATH}"
 	if {
 		cd arbor
-		if {
-			redirfd -w 1 config/defaults.tmp
-			sed -e "s;^ARBOR_AR=.*;ARBOR_AR=ecc-ar;"
-			    -e "s;^AS=.*;AS=ecc-as;"
-			    -e "s;^CC=.*;CC=ecc;"
-			    -e "s;^LD=.*;LD=ecc-ld;"
-			    -e "s;^LDFLAGS=.*;LDFLAGS=-static;"
-			    -e "s;^RANLIB=.*;RANLIB=ecc-ranlib;"
-			    -e "s;^STRIP=.*;STRIP=ecc-strip;"
-			    config/defaults
-		}
-		if { mv config/defaults.tmp config/defaults }
-		bin/arbor -b stdenv curl
+		if { ./bootstrap }
+		bin/arbor $GLACIES_PACKAGES
 	}
+	# explode stdenv
 	if {
-		find arbor ! -type d -name "*.pkg" -exec
-		    define pkg "{}"
-		    if { pipeline { $UNLZ {} } venus-ar -x }
-		    rm -f $pkg
-		    ;
+		export PATH "${PWD}/arbor/bin:${PATH}"
+		backtick ARBOR_HOSTARCH { uname -m }
+		export ARBOR_HOSTOS "linux"
+		envfile arbor/config/defaults
+		backtick cacerts { arbor-priv-printpkgdep ca-certificates }
+		backtick curl { arbor-priv-printpkgdep curl }
+		backtick stdenv { arbor-priv-printpkgdep stdenv }
+		backtick ssl { arbor-priv-printpkgdep libressl }
+		multisubstitute {
+			importas -iu cacerts cacerts
+			importas -iu curl curl
+			importas -iu stdenv stdenv
+			importas -iu ssl ssl
+		}
+		if {
+			arbor-priv-pkgexplode
+			    arbor/${cacerts}
+			    arbor/${curl}
+			    arbor/${stdenv}
+			    arbor/${ssl}
+		}
+		# XXX: do not populate stdenv (ideal = arbor blacklist)
+		rm arbor/${stdenv}
+	}
+	# populate store
+	if {
+		cd arbor
+		if { bin/arbor -p }
+		bin/arbor -o ../venus-store/repo/disk
 	}
 	# prepare to chroot
-	if { mkdir -p dev sys proc tmp etc/ssl/certs }
+	if { mkdir -p dev sys proc tmp etc }
 	if { ln -s . usr }
 	if { ln -s bin sbin }
 	if {
 		cd etc
-		if { mkdir -p ssl/certs }
-		if { cp /etc/ssl/certs/ca-certificates.crt ssl/certs }
+		if { cp /etc/resolv.conf . }
 		touch fstab group passwd
 	}
-	cd arbor
-	if { git checkout config/defaults }
-	if {
-		redirfd -w 1 config/defaults.tmp
-		sed -e "s;^LDFLAGS=.*;LDFLAGS=-static;"
-		    -e "s;^DEFLATE=.*;DEFLATE=lzip -0;"
-		config/defaults
-	}
-	mv config/defaults.tmp config/defaults
 }
 $SU if {
 	cd build
-	# prepare store
-	if { mkdir -p venus-store }
+	# init store
+	if { mkdir -p venus-store mnt }
 	if { git clone https://git.eltaninos.org/venus }
 	if { cp -R venus/pm mnt/venus-store }
+	if { cp -R venus-store mnt }
+	# copy data store
 	if { cp -R ../data/venus-store mnt }
+	if {
+		redirfd -a 1 mnt/venus-store/repo/disk/chksum
+		cd ../data/venus-store/cache
+		pipeline { ls } sed "s;^\\(.\\{128\\}\\)\\.\\(.*\\);\\2:\\1;"
+	}
+	# prepare store to install
 	if { mount -o bind,rw mnt/venus-store venus-store }
 	if { rm venus-store/root }
 	if { ln -s /mnt venus-store/root }
@@ -98,12 +101,6 @@ $SU if {
 	if { mount -o bind,ro /proc proc }
 	export PATH "${DEFAULT_PATH}"
 	chroot .
-	# build glacies packages
-	export ARBOR "/arbor"
-	if {
-		cd arbor
-		bin/arbor -b ${GLACIES_PACKAGES}
-	}
 	# install glacies
 	if {
 		cd mnt
@@ -120,45 +117,15 @@ $SU if {
 		if { ln -s . usr }
 		if { ln -s bin sbin }
 	}
-	# populate store
-	cd venus-store
-	if { mkdir -p repo/disk }
-	if {
-		find -L /arbor/repo -type f -name "*.pkg" -exec
-		    define pkg "{}"
-		    backtick -Ex dir { dirname $pkg }
-		    backtick -Ex name { venus-conf name ${dir}/package }
-		    ifelse { test -h $dir } {
-		    	backtick -Ex file { basename $dir }
-		    	ln -s $name repo/disk/${file}
-		    }
-		    if { install -m 0755 ${dir}/package repo/disk/${name} }
-		    backtick cksum {
-		    	pipeline { venus-cksum -w $pkg }
-		    	venus-conf $pkg
-		    }
-		    backtick version { venus-conf version ${dir}/package }
-		    multisubstitute {
-		    	importas -iu cksum cksum
-		    	importas -iu version version
-		    }
-		    install -m 0755 $pkg cache/${cksum}.${name}#${version}.pkg
-		    ;
-	}
-	if {
-		pipeline {
-			cd cache
-			find . -type f -name "*.pkg"
-		}
-		redirfd -w 1 repo/disk/chksum
-		sed -e "s;^\\./;;" -e "s;^\\(.\\{128\\}\\)\\.\\(.*\\);\\2:\\1;"
-	}
+	# certificates
+	if { mkdir -p etc/ssl/certs }
+	if { update-ca-certificates --fresh }
 	# install packages
+	cd venus-store
 	if { redo repo/update }
 	if {
 		redo
 		    programs/glacies-etc
-		    programs/glacies-setup
 		    programs/glacies-scripts
 		    programs/system-core
 		    programs/${GLACIES_PACKAGES}
@@ -192,12 +159,11 @@ if {
 	}
 	# rc
 	if {
-		backtick -Ex stamp { date "+%Y%m%d%H%M%S" }
-		if { s6-rc-compile etc/s6/rc/compiled-${stamp} etc/s6/sv }
-		ln -s compiled-${stamp} etc/s6/rc/compiled
+		if { s6-rc-compile etc/s6/rc/compiled-default etc/s6/sv }
+		ln -s compiled-default etc/s6/rc/compiled
 	}
 	# initramfs
 	backtick -Ex version { ls lib/modules }
 	mkinitramfs $version
 }
-umount dev sys proc
+umount dev tmp sys proc
