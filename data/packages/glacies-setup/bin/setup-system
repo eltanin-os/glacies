@@ -1,0 +1,71 @@
+#!/bin/execlineb -S1
+fdmove -c 2 1
+# $1=network?
+cd /mnt
+if {
+	mkdir -p bin boot dev etc home include lib libexec
+	    mnt opt proc share run src srv sys var
+}
+if { mkdir -m 0750 root }
+if { mkdir -m 1777 tmp }
+if {
+	cd var
+	mkdir -p db empty lib lock log pkg run spool
+}
+if { ln -s . usr }
+if { ln -s bin sbin }
+if {
+	ifelse { $1 } {
+		if { echo "<message> copying online store..." }
+		if { cp -R /opt/pm venus-store }
+		cd venus-store
+		redo repo/update
+	}
+	if { echo "<message> copying offline store..." }
+
+	cp -R /venus-store .
+}
+if {
+	cd venus-store
+	if { rm root }
+	if { ln -s /mnt root }
+	if { redo repo/update }
+	backtick packages {
+		pipeline { ls /venus-store/programs }
+		sed -e "/.do$/d" -e "/^glacies-setup$/d"
+	}
+	importas -isu packages packages
+	redo programs/$packages
+}
+if {
+	redirfd -a 1 ./etc/fstab
+	pipeline { mount }
+	sed -n "s;/mnt;;p"
+}
+if { mount -t tmpfs tmpfs tmp }
+if {
+	chroot .
+	# venus-store
+	if { rm venus-store/root }
+	if { ln -s .. venus-store/root }
+	# certificates
+	if { mkdir -p etc/ssl/certs }
+	if { update-ca-certificates --fresh }
+	# init
+	if {
+		cd /etc/s6
+		export S6_INIT_FLAGS "-1c"
+		redo current
+	}
+	# rc
+	if {
+		if { s6-rc-compile etc/s6/rc/compiled-default etc/s6/sv }
+		ln -s compiled-default etc/s6/rc/compiled
+	}
+	# setup
+	if { update-fonts }
+	# initramfs
+	backtick -Ex version { ls lib/modules }
+	mkinitramfs $version
+}
+umount tmp

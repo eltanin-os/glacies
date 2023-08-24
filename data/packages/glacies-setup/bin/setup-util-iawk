@@ -1,0 +1,11 @@
+#!/bin/execlineb -s1
+# $1=file
+# inplace awk
+backtick -Ex tmpfile { mktemp -u }
+if { cp $1 $tmpfile }
+if {
+	redirfd -r 0 $1
+	redirfd -w 1 $tmpfile
+	awk $@
+}
+mv $tmpfile $1

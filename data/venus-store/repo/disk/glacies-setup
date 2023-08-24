@@ -1,0 +1,7 @@
+name:glacies-setup
+version:20230817
+license:UNLICENSE
+description:Eltanin Glacies installation scripts.
+rundeps{
+system-core
+}

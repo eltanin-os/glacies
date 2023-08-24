@@ -1,0 +1,80 @@
+#!/bin/execlineb -S0
+if { mount -nt devtmpfs devtmpfs /dev }
+if { mount -nt proc proc /proc }
+if { mount -nt sysfs sysfs /sys }
+foreground {
+	background { mdevd -C }
+	foreground {
+		loopwhilex -x 0
+		pipeline { lsblk -f } grep -q "ISOIMAGE"
+	}
+	importas -iu ! !
+	kill $!
+
+}
+backtick root {
+	awk "
+		BEGIN {
+			FS=\"=\"
+			RS=\" \"
+			OFS=\"=\"
+		}
+		/root=/ {
+			gsub(\"root=\", \"\")
+			print
+		}
+	"
+	/proc/cmdline
+}
+backtick rootflags {
+	awk "
+		BEGIN {
+			FS=\"=\";
+			RS=\" \";
+		}
+		/rootflags=/ {
+			print $2
+		}
+	"
+	/proc/cmdline
+}
+backtick rootfstype {
+	awk "
+		BEGIN {
+			FS=\"=\";
+			RS=\" \";
+		}
+		/rootfstype=/ {
+			print $2
+		}
+	"
+	/proc/cmdline
+}
+multisubstitute {
+	importas -iu root root
+	importas -iu rootflags rootflags
+	importas -iu rootfstype rootfstype
+}
+backtick -Ex device {
+	case -- $root {
+	"UUID=.*" {
+		pipeline { echo $root }
+		awk -F"=" "{ print \"/dev/disk/by-uuid/\"$2 }"
+	}
+	"LABEL=.*" {
+		pipeline { echo $root }
+		awk -F"=" "{ print \"/dev/disk/by-label/\"$2 }"
+	}
+	}
+	echo $root
+}
+if { mkdir .root }
+if { mount -nt $rootfstype -o $rootflags $device .root }
+if {
+	backtick -xED "eltanin-glacies" hostname { cat .root/etc/hostname }
+	hostname $hostname
+}
+if { mount -o move /dev .root/dev }
+if { mount -o move /proc .root/proc }
+if { mount -o move /sys .root/sys }
+switch_root .root /sbin/init $@

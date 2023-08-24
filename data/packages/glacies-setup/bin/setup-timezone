@@ -1,0 +1,4 @@
+#!/bin/execlineb -P
+# $1=timezone file
+backtick -Ex path { find /usr/share/zoneinfo -type f -name $1 }
+ln -sf $path /etc/localtime

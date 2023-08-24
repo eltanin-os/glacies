@@ -1,0 +1,35 @@
+#!/bin/execlineb -P
+define LIMINE "/venus-store/programs/limine-bin"
+cd $LIMINE
+backtick -Ex root { pipeline { mount } awk "/\\/mnt / { print $1 }" }
+if {
+	backtick -Ex boot { pipeline { echo $root } sed "s;[0-9]*$;;" }
+	limine bios-install $boot
+}
+if {
+	cd ./share/limine
+	if { mkdir -p /mnt/boot }
+	cp limine-bios.sys /mnt/boot
+}
+backtick boot {
+	if -nt { pipeline { mount } grep -q "/mnt/boot" }
+	echo "boot/"
+}
+backtick type { pipeline { mount } awk "/\\/mnt / { print $3 }" }
+backtick version { ls /mnt/lib/modules } # XXX
+multisubstitute {
+	importas -iu boot boot
+	importas -iu type type
+	importas -iu version version
+}
+heredoc 0
+"TIMEOUT 5
+
+:Eltanin Glacies
+PROTOCOL=linux
+KERNEL_PATH=boot:///${boot}vmlinuz-${version}
+CMDLINE=root=${root} rootfstype=${type} quiet
+MODULE_PATH=boot:///${boot}initramfs-${version}
+"
+redirfd -w 1 /mnt/boot/limine.cfg
+cat

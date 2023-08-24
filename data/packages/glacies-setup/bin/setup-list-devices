@@ -1,0 +1,4 @@
+#!/bin/execlineb -P
+fdclose 2
+pipeline { lsblk -Adpno name }
+sort

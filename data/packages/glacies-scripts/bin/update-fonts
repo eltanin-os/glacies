@@ -1,0 +1,16 @@
+#!/bin/execlineb -P
+# TODO: A local and global interface to set fonts with a unified interface
+if {
+	backtick -Ex user { whoami }
+	test "root" = "${user}"
+}
+envfile /etc/s6/rc.conf
+multisubstitute {
+	define ARCAN_FONTDIR "/usr/share/arcan/resources/fonts"
+	define FONTDIR "/usr/share/fonts"
+	importas -i FONT_DEFAULT FONT_DEFAULT
+	importas -i FONT_MONO FONT_MONO
+}
+if { mkdir -p $ARCAN_FONTDIR }
+if { ln -sf ${FONTDIR}/${FONT_DEFAULT} ${ARCAN_FONTDIR}/default }
+ln -sf ${FONTDIR}/${FONT_MONO} ${ARCAN_FONTDIR}/mono

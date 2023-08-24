@@ -1,0 +1,5 @@
+#!/bin/execlineb -P
+fdclose 2
+pipeline { ls /sys/class/net }
+pipeline { sed "/lo/d" }
+sort

@@ -1,0 +1,9 @@
+#!/bin/execlineb -s1
+ifelse { test -z "${1}" } {
+	pipeline { ls -F /usr/share/zoneinfo }
+	grep "^[A-Z].*/$"
+}
+cd /usr/share/zoneinfo/${1}
+pipeline { find . }
+pipeline { sed -e "/^\.$/d" -e "s;./;;" }
+sort

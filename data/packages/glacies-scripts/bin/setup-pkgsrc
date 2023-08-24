@@ -1,0 +1,37 @@
+#!/bin/execlineb -p
+if {
+	backtick -Ex user { whoami }
+	test "root" = "${user}"
+}
+cd /
+if {
+	pipeline { curl -o - https://cdn.netbsd.org/pub/pkgsrc/stable/pkgsrc.tar.xz }
+	pipeline { xzcat }
+	tar -xf -
+}
+cd pkgsrc
+export TOUCH_FLAGS "" # '-f' is not specified in POSIX
+export bootstrap_awk "/bin/awk"
+pipeline {
+	heredoc 0
+"
+MACHINE_GNU_PLATFORM= ${HOSTARCH}-unknown-linux-musl
+BUILDLINK_TRANSFORM+= rm:-lbsd
+COMPILER_INCLUDE_DIRS= /include
+LIBABISUFFIX=
+TOOLS_PLATFORM.bash=
+TOOLS_PLATFORM.gawk=
+TOOLS_PLATFORM.gtar=
+TOOLS_PLATFORM.gm4=
+TOOLS_PLATFORM.gsed=
+TOOLS_PLATFORM.flex= /bin/lex
+TOOLS_PLATFORM.lex= /bin/lex
+TOOLS_PLATFORM.m4= /bin/m4
+TOOLS_PLATFORM.patch= /bin/patch
+TOOLS_PLATFORM.pax= /bin/pax
+TOOLS_PLATFORM.sed= /bin/sed
+TOUCH_FLAGS=
+"
+	cat
+}
+./bootstrap --full --prefix /pkg --prefer-pkgsrc yes --make-jobs $nprocs --mk-fragment -

@@ -1,0 +1,9 @@
+#!/bin/execlineb -S4
+# $1=device $2=path $3=fstype $4=format?
+fdmove -c 2 1
+ifelse { test "swap" = "${3}" } {
+	if { if -t { $4 } mkswap $1 }
+	swapon $1
+}
+if { if -t { $4 } mkfs.${3} $1 }
+mount $1 /mnt${2}

@@ -1,0 +1,4 @@
+#!/bin/execlineb -P
+# TODO: A local and global interface to set keymaps with a unified interface.
+# The easiest path may be ditch tty and let arcan deal with everything.
+true

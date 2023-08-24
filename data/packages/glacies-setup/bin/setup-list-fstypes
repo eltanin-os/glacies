@@ -1,0 +1,6 @@
+#!/bin/execlineb -P
+fdclose 2
+elglob binaries "/bin/mkfs.*"
+pipeline { printf "%s\n" $binaries }
+pipeline { sed "s;^/bin/mkfs.;;g" }
+sort

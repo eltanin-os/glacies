@@ -1,0 +1,3 @@
+#!/bin/execlineb -P
+if -t { test -s /etc/modules }
+pipeline { cat /etc/modules } xargs modprobe -aq

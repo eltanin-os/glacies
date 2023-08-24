@@ -1,0 +1,48 @@
+#!/bin/execlineb -P
+# COLORS
+backtick c0 { tput sgr0 }
+backtick c1 { tput setaf 7 }
+backtick c2 { tput setaf 1 }
+backtick c3 { tput setaf 3 }
+# INFO
+backtick KERNEL { uname -sr }
+backtick UP { pipeline { uptime } awk -F"," "sub(\".*up \",x,$1){print $1}" }
+backtick PKGCNT { pipeline { ls /venus-store/programs } wc -l }
+backtick ME { whoami }
+backtick HOSTNAME { hostname }
+backtick MEM { pipeline { awk "/MemTotal|Shmem:|MemFree|Buffers|^Cached|SReclaimable/ {print $2}" /proc/meminfo } awk "BEGIN { RS=\"\"; FS=\"\\n\" } {printf \"%dM / %dM\\n\", ($1+$5-$2-$3-$4-$6)/1024, $1/1024}" }
+multisubstitute {
+	importas -iu c0 c0
+	importas -iu c1 c1
+	importas -iu c2 c2
+	importas -iu c3 c3
+	importas -iu KERNEL KERNEL
+	importas -iu UP UP
+	importas -iu PKGCNT PKGCNT
+	importas -iu MEM MEM
+	importas -iu ME ME
+	importas -iu HOSTNAME HOSTNAME
+	define OS "Eltanin Glacies"
+}
+heredoc 0
+"${c1}                        ^.       Y.${c3}     ${ME}${c0}@${c3}${HOSTNAME}
+${c1}                        5       J5${c0}      ----------------------
+${c1}                      .P^     7B?${c3}       OS${c0}: ${OS}
+${c1}                     J#^   ^P&Y.${c3}        Kernel${c0}: ${KERNEL}
+${c1}                   ?&5  :Y&#?.${c3}          Uptime${c0}: ${UP}
+${c1}                .J&&J!J&@@5:${c3}            Packages${c0}: ${PKGCNT}
+${c1}              .P@@@#&@@@@&&#BGG5?7..:${c3}   Memory${c0}: ${MEM}
+${c1}             ~@@@@@@&@@@@@@@@@&&&&&#?^:
+${c1}           B&@@@@@&#${c2}&${c1}@@@@@@@@@@@&&&&&&Y!
+${c1}     .!7^.5@@@@@BG&@@@@@@@@@@@@@@@@&&&&&
+${c1}  ~B#@@@@@@@@@@@@@@@@57JJ?~^^!P&@@@@@&&&
+${c1}  &@P&@@@@@@@@@@B::P#J#&&J7!~7Y#@@@@@&#&
+${c1} ^@@@@@@@@@P#B~!. .B&@@@J7Y&@@@@@@@@@@#&
+${c1} B@@BY^!7.? .. ~?GP&@@@P~7B@@@@@@@@@@@@@
+${c1} :J!   .!7Y#&&&@@@@@@@??!:!G@@@@@@@@@@@@
+${c1}    .#&@@@@@@@&#BGPY?..YJJ!^^75#@@@@@@@@
+${c1}    7@@@#Y!:.          ?PPBG5Y?!&@@@@@@@
+${c1}     ?Y!.              ~GGB##BG#@@@@@@@@
+${c1}                       :5G##BG@@@@@@@@@@${c0}
+"
+cat

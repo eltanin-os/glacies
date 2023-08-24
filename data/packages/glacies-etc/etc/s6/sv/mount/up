@@ -1,0 +1,6 @@
+#!/bin/execlineb -P
+if { mount -o remount,rw / }
+if { mkdir -p /dev/pts /dev/shm }
+if { mount -a }
+if { swapon -a }
+ln -s /proc/self/fd /dev/fd

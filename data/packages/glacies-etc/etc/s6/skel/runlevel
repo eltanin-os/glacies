@@ -1,0 +1,2 @@
+#!/bin/execlineb -S1
+s6-rc -up change $1

@@ -1,0 +1,2 @@
+#!/bin/execlineb -P
+# script run in parallel with default services
