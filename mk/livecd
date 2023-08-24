@@ -10,15 +10,17 @@ multisubstitute {
 if {
 	if { $SU cp data/init.in build/mnt/etc/init.in }
 	backtick -Ex kversion { ls ${PROGRAMS}/linux/lib/modules }
-	$SU chroot build/mnt
-	    if { s6-linux-init-maker -1nc /etc/s6/current tmp/s6.tmp }
-	    if { rm -Rf etc/s6/current }
-	    if { mv tmp/s6.tmp etc/s6/current }
-	    if {
-	    	elglob files "/etc/s6/current/bin/*"
-	    	cp -PRp $files sbin
-	    }
-	    /bin/mkinitramfs $kversion
+	$SU if { mount -t tmpfs tmpfs build/mnt/tmp }
+	if {
+		chroot build/mnt
+		    if {
+		    	cd /etc/s6
+		    	export S6_INIT_FLAGS "-1nc"
+		    	redo current
+		    }
+		    /bin/mkinitramfs $kversion
+	}
+	umount build/mnt/tmp
 }
 if { $SU mksquashfs build/mnt ${tmpdir}/image.squashfs -comp xz }
 # BOOT
@@ -39,21 +41,21 @@ MODULE_PATH=boot:///boot/initramfs-${kversion}
 if { cp -R build/mnt/boot $tmpdir }
 if {
 	cd ${PROGRAMS}/limine-bin/share/limine
-	cp limine-cd.bin limine-cd-efi.bin limine.sys ${tmpdir}/boot
+	cp limine-uefi-cd.bin limine-bios-cd.bin limine-bios.sys ${tmpdir}/boot
 }
 # ISO
 if {
 	xorriso -as mkisofs
-	    -b boot/limine-cd.bin
+	    -b boot/limine-bios-cd.bin
 	    -no-emul-boot
 	    -boot-load-size 4
 	    -boot-info-table
-	    --efi-boot boot/limine-cd-efi.bin
+	    --efi-boot boot/limine-uefi-cd.bin
 	    -efi-boot-part
 	    --efi-boot-image
 	    --protective-msdos-label
 	    -o output.iso
 	    $tmpdir
 }
-if { build/mnt/venus-store/programs/limine-bin/bin/limine-deploy output.iso }
+if { build/mnt/venus-store/programs/limine-bin/bin/limine bios-install output.iso }
 rm -Rf $tmpdir
