@@ -1,5 +1,6 @@
-bzip2
+# system core
 bc
+bzip2
 ca-certificates
 ccore
 curl
@@ -24,8 +25,18 @@ s6
 s6-linux-init
 s6-rc
 sh
+tz
 ubase
 util-linux
 venus
 wpa-supplicant
 xz
+# gui
+arcan
+durden
+font-ttf-anonymous-pro
+font-ttf-montserrat
+installer-tui
+# kernel
+linux
+linux-firmware
