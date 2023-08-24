@@ -1,5 +1,5 @@
 #!/bin/execlineb -P
-backtick GLACIES_PACKAGES { cat mk/packages }
+backtick GLACIES_PACKAGES { grep -v "^#" mk/packages }
 backtick HOSTARCH { uname -m }
 envfile mk/env.conf
 multisubstitute {
@@ -19,8 +19,8 @@ if {
 	foreground { echo "${SU}: umask must be 022" }
 	exit 1
 }
+cd build
 if {
-	cd build
 	# clone arbor
 	if { git clone https://git.eltaninos.org/arbor }
 	getcwd PWD
@@ -65,7 +65,7 @@ if {
 	if {
 		cd arbor
 		if { bin/arbor -p }
-		bin/arbor -o ../venus-store/repo/disk
+		bin/arbor -o ../mnt/venus-store/repo/disk
 	}
 	# prepare to chroot
 	if { mkdir -p dev sys proc tmp etc }
@@ -78,12 +78,13 @@ if {
 	}
 }
 $SU if {
-	cd build
 	# init store
-	if { mkdir -p venus-store mnt }
+	if { mkdir -p mnt }
 	if { git clone https://git.eltaninos.org/venus }
-	if { cp -R venus/pm mnt/venus-store }
-	if { cp -R venus-store mnt }
+	if { cp -R venus/pm/. mnt/venus-store }
+	# copy pm for installer
+	if { mkdir -p mnt/opt }
+	if { cp -R venus/pm mnt/opt }
 	# copy data store
 	if { cp -R ../data/venus-store mnt }
 	if {
@@ -91,14 +92,7 @@ $SU if {
 		cd ../data/venus-store/cache
 		pipeline { ls } sed "s;^\\(.\\{128\\}\\)\\.\\(.*\\);\\2:\\1;"
 	}
-	# prepare store to install
-	if { mount -o bind,rw mnt/venus-store venus-store }
-	if { rm venus-store/root }
-	if { ln -s /mnt venus-store/root }
 	# chroot
-	if { mount -o bind,ro /dev dev }
-	if { mount -o bind,ro /sys sys }
-	if { mount -o bind,ro /proc proc }
 	export PATH "${DEFAULT_PATH}"
 	chroot .
 	# install glacies
@@ -121,49 +115,40 @@ $SU if {
 	if { mkdir -p etc/ssl/certs }
 	if { update-ca-certificates --fresh }
 	# install packages
-	cd venus-store
-	if { redo repo/update }
+	cd mnt/venus-store
 	if {
 		redo
 		    programs/glacies-etc
 		    programs/glacies-scripts
+		    programs/glacies-setup
 		    programs/system-core
 		    programs/${GLACIES_PACKAGES}
-		    programs/linux
 	}
 	redo cache/clean
 }
-cd build
-if { umount dev sys proc venus-store }
 cd mnt
 if { mount -t tmpfs tmpfs tmp }
-if { mount -o bind,ro /dev dev }
-if { mount -o bind,ro /sys sys }
-if { mount -o bind,ro /proc proc }
 if {
 	export PATH "${DEFAULT_PATH}"
 	chroot .
-	# venus-store
-	if { rm venus-store/root }
-	if { ln -s .. venus-store/root }
 	# certificates
 	if { mkdir -p etc/ssl/certs }
 	if { update-ca-certificates --fresh }
 	# init
-	if { s6-linux-init-maker -1c /etc/s6/current tmp/s6.tmp }
-	if { rm -Rf etc/s6/current }
-	if { mv tmp/s6.tmp etc/s6/current }
 	if {
-		elglob files "/etc/s6/current/bin/*"
-		cp -PRp $files sbin
+		cd /etc/s6
+		export S6_INIT_FLAGS "-1c"
+		redo current
 	}
 	# rc
 	if {
 		if { s6-rc-compile etc/s6/rc/compiled-default etc/s6/sv }
 		ln -s compiled-default etc/s6/rc/compiled
 	}
+	# setup
+	if { update-fonts }
 	# initramfs
 	backtick -Ex version { ls lib/modules }
 	mkinitramfs $version
 }
-umount dev tmp sys proc
+umount tmp
