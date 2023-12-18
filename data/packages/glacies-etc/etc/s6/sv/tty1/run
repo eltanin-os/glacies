@@ -1,3 +1,2 @@
 #!/bin/execlineb -P
-foreground { if { test -e /etc/issue } cat /etc/issue }
-getty /dev/tty1
+fgetty /dev/tty1
