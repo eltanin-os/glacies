@@ -8,6 +8,7 @@ dhcpcd
 e2fsprogs
 ecore
 execline
+fgetty
 gzip
 heirloom-doctools
 iproute2
@@ -15,11 +16,11 @@ kbd
 kmod
 libressl
 limine-bin
-lzip
 mandoc
 mdevd
 ncurses
 neatvi
+plzip
 redo
 s6
 s6-linux-init
@@ -31,12 +32,19 @@ util-linux
 venus
 wpa-supplicant
 xz
+# audio
+alsa-utils
+sndio
 # gui
 arcan
 durden
 font-ttf-anonymous-pro
 font-ttf-montserrat
 installer-tui
+xwayland
+xkbcomp
+# gui apps
+libreselene
 # kernel
 linux
 linux-firmware
