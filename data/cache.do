@@ -1,4 +1,5 @@
 #!/bin/execlineb -P
+envfile ../mk/env.conf
 backtick packages { ls packages }
 importas -isu packages packages
 forx -Ep package { $packages }
@@ -6,7 +7,8 @@ if {
 	cd packages/${package}
 	pipeline { venus-ar -c . }
 	redirfd -w 1 ../../venus-store/cache/${package}
-	lzip -9
+	importas -is LZ LZ
+	$LZ
 }
 cd venus-store/cache
 backtick sum { pipeline { venus-cksum $package } venus-conf $package }
