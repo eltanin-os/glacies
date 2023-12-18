@@ -1,5 +1,6 @@
 #!/bin/execlineb -P
 envfile ../mk/env.conf
+if { mkdir -p packages/system-core } # XXX
 backtick packages { ls packages }
 importas -isu packages packages
 forx -Ep package { $packages }
