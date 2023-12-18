@@ -1,4 +1,14 @@
-#!/bin/execlineb -P
+#!/bin/execlineb -S1
 # $1=timezone file
-backtick -Ex path { find /usr/share/zoneinfo -type f -name $1 }
-ln -sf $path /etc/localtime
+backtick -Ex time {
+	backtick base { basename $1 }
+	backtick dir { dirname $1 }
+	multisubstitute {
+		importas -iu base base
+		importas -iu dir dir
+	}
+	cd /usr/share/zoneinfo/${dir}
+	pipeline { find . -type l -name $base }
+	head -n1
+}
+ln -sf $time /etc/localtime

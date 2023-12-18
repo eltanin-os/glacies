@@ -1,10 +1,11 @@
 #!/bin/execlineb -P
+fdmove -c 2 1
 define LIMINE "/venus-store/programs/limine-bin"
 cd $LIMINE
 backtick -Ex root { pipeline { mount } awk "/\\/mnt / { print $1 }" }
 if {
-	backtick -Ex boot { pipeline { echo $root } sed "s;[0-9]*$;;" }
-	limine bios-install $boot
+	backtick -Ex device { pipeline { echo $root } sed "s;[0-9]*$;;" }
+	limine bios-install $device
 }
 if {
 	cd ./share/limine

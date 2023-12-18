@@ -6,4 +6,4 @@ ifelse { test "swap" = "${3}" } {
 	swapon $1
 }
 if { if -t { $4 } mkfs.${3} $1 }
-mount $1 /mnt${2}
+mount -nt $3 $1 /mnt${2}

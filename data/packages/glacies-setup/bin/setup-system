@@ -22,20 +22,17 @@ if {
 		redo repo/update
 	}
 	if { echo "<message> copying offline store..." }
-
 	cp -R /venus-store .
 }
 if {
 	cd venus-store
 	if { rm root }
 	if { ln -s /mnt root }
-	if { redo repo/update }
-	backtick packages {
-		pipeline { ls /venus-store/programs }
-		sed -e "/.do$/d" -e "/^glacies-setup$/d"
-	}
+	backtick packages { cat /opt/packages }
 	importas -isu packages packages
-	redo programs/$packages
+	# XXX: ARG_MAX
+	if { redo programs/$packages }
+	redo programs/populate
 }
 if {
 	redirfd -a 1 ./etc/fstab

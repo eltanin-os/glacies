@@ -1,19 +1,20 @@
 #!/bin/execlineb -S2
 # $1=file $2=entry
-setup-util-iawk $1 -ventry=$2 "
+setup-util-awk $1 -ventry=$2 "
 BEGIN {
 	p=1
 	found=0
 	split(entry,args,\":\")
-	FS=OFS=\":\"
 }
-{p=1}
-$1 == args[1] {
-	p=0
-	found=1
-	line=$1
-	for (i=2; i <= length(args); i++) line=line\":\"args[i]
-	print line
+{
+	split($0,line,\":\")
+	if (line[1] == args[1]) {
+		found=1
+		p=0
+		print entry
+	} else {
+		p=1
+	}
 }
 p
 END {

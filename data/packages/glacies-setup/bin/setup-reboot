@@ -1,2 +1,3 @@
 #!/bin/execlineb -P
-shutdown -r now
+if { sync }
+reboot -f

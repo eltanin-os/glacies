@@ -1,4 +1,5 @@
-#!/bin/execlineb -S3
+#!/bin/execlineb -S4
+fdmove -c 2 1
 # $1=name $2=uid $3=password $4=groups
 # add user info
 if { setup-util-pwadd /mnt/etc/passwd "${1}:x:${2}:${2}::/home/${1}:/bin/sh" }
@@ -6,18 +7,18 @@ if { setup-util-pwadd /mnt/etc/passwd "${1}:x:${2}:${2}::/home/${1}:/bin/sh" }
 if { setup-util-pwadd /mnt/etc/group "${1}:x:${2}:" }
 if {
 	# populate groups
-	setup-util-iawk -vuser="${1}" -vgroups="${4}" "
+	setup-util-awk /mnt/etc/group -vuser=${1} -vgroups=${4} "
 BEGIN {
-	split(groups, arr, ",")
-	FS=OFS=":"
+	split(groups, arr, \",\")
+	FS=OFS=\":\"
 }
 {
 	for(i=1; i<=length(arr); i++) {
 		if($1 == arr[i]) {
-			if($4 == "")
+			if($4 == \"\")
 				$4=user
 			else
-				$4=$4","user
+				$4=$4\",\"user
 		}
 	}
 	print
@@ -25,5 +26,5 @@ BEGIN {
 "
 }
 if { setup-password $1 $3 }
-if { mkdir /mnt/home/${1} }
-chown ${1}:${1} /mnt/home/${1}
+if { mkdir -p /mnt/home/${1} }
+chown ${2}:${2} /mnt/home/${1}
