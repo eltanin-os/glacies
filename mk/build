@@ -1,4 +1,5 @@
 #!/bin/execlineb -P
+if { redo data/cache }
 backtick GLACIES_PACKAGES { grep -v "^#" mk/packages }
 backtick HOSTARCH { uname -m }
 envfile mk/env.conf
@@ -65,17 +66,15 @@ if {
 	if {
 		cd arbor
 		if { bin/arbor -p }
-		bin/arbor -o ../mnt/venus-store/repo/disk
+		bin/arbor -o ../../mnt/venus-store/repo/disk
 	}
 	# prepare to chroot
 	if { mkdir -p dev sys proc tmp etc }
 	if { ln -s . usr }
 	if { ln -s bin sbin }
-	if {
-		cd etc
-		if { cp /etc/resolv.conf . }
-		touch fstab group passwd
-	}
+	cd etc
+	if { cp /etc/resolv.conf . }
+	touch fstab group passwd
 }
 $SU if {
 	# init store
@@ -95,27 +94,34 @@ $SU if {
 	# chroot
 	export PATH "${DEFAULT_PATH}"
 	chroot .
-	# install glacies
-	if {
-		cd mnt
-		if {
-			mkdir -p bin boot dev etc home include lib libexec
-			mnt opt proc share run src srv sys var
-		}
-		if { mkdir -m 0750 root }
-		if { mkdir -m 1777 tmp }
-		if {
-			cd var
-			mkdir -p db empty lib lock log pkg run spool
-		}
-		if { ln -s . usr }
-		if { ln -s bin sbin }
-	}
 	# certificates
 	if { mkdir -p etc/ssl/certs }
 	if { update-ca-certificates --fresh }
+	# prepare fhs
+	cd mnt
+	if {
+		mkdir -p bin boot dev etc home include lib libexec
+		mnt opt proc share run src srv sys var
+	}
+	if { mkdir -m 0750 root }
+	if { mkdir -m 1777 tmp }
+	if {
+		cd var
+		mkdir -p db empty lib lock log pkg run spool
+	}
+	if { ln -s . usr }
+	if { ln -s bin sbin }
+	# store package list
+	if {
+		redirfd -w 1 opt/packages
+		printf "%s\n"
+		    glacies-etc
+		    glacies-scripts
+		    system-core
+		    ${GLACIES_PACKAGES}
+	}
 	# install packages
-	cd mnt/venus-store
+	cd venus-store
 	if {
 		redo
 		    programs/glacies-etc
@@ -124,6 +130,7 @@ $SU if {
 		    programs/system-core
 		    programs/${GLACIES_PACKAGES}
 	}
+	if { redo programs/populate }
 	redo cache/clean
 }
 cd mnt
@@ -132,7 +139,7 @@ if {
 	export PATH "${DEFAULT_PATH}"
 	chroot .
 	# certificates
-	if { mkdir -p etc/ssl/certs }
+	if { mkdir -p /etc/ssl/certs }
 	if { update-ca-certificates --fresh }
 	# init
 	if {
@@ -142,13 +149,13 @@ if {
 	}
 	# rc
 	if {
-		if { s6-rc-compile etc/s6/rc/compiled-default etc/s6/sv }
-		ln -s compiled-default etc/s6/rc/compiled
+		if { s6-rc-compile /etc/s6/rc/compiled-default /etc/s6/sv }
+		ln -s compiled-default /etc/s6/rc/compiled
 	}
 	# setup
 	if { update-fonts }
 	# initramfs
-	backtick -Ex version { ls lib/modules }
+	backtick -Ex version { ls /lib/modules }
 	mkinitramfs $version
 }
 umount tmp

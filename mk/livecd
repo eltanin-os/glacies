@@ -8,7 +8,8 @@ multisubstitute {
 }
 # IMAGE
 if {
-	if { $SU cp data/init.in build/mnt/etc/init.in }
+	if { $SU cp data/issue build/mnt/etc }
+	if { $SU cp data/init.in build/mnt/etc }
 	backtick -Ex kversion { ls ${PROGRAMS}/linux/lib/modules }
 	$SU if { mount -t tmpfs tmpfs build/mnt/tmp }
 	if {
