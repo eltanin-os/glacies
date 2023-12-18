@@ -10,11 +10,11 @@ heirloom-doctools
 iproute2
 kbd
 kmod
-lzip
 mandoc
 mdevd
 ncurses
 neatvi
+plzip
 redo
 s6
 s6-linux-init
