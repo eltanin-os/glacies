@@ -7,7 +7,7 @@ backtick c3 { tput setaf 3 }
 # INFO
 backtick KERNEL { uname -sr }
 backtick UP { pipeline { uptime } awk -F"," "sub(\".*up \",x,$1){print $1}" }
-backtick PKGCNT { pipeline { ls /venus-store/programs } wc -l }
+backtick PKGCNT { pipeline { ls /venus-store/modules/venus/root.progs/ } wc -l }
 backtick ME { whoami }
 backtick HOSTNAME { hostname }
 backtick MEM { pipeline { awk "/MemTotal|Shmem:|MemFree|Buffers|^Cached|SReclaimable/ {print $2}" /proc/meminfo } awk "BEGIN { RS=\"\"; FS=\"\\n\" } {printf \"%dM / %dM\\n\", ($1+$5-$2-$3-$4-$6)/1024, $1/1024}" }

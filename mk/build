@@ -1,18 +1,15 @@
 #!/bin/execlineb -P
 if { redo data/cache }
-backtick GLACIES_PACKAGES { grep -v "^#" mk/packages }
-backtick HOSTARCH { uname -m }
-envfile mk/env.conf
-multisubstitute {
-	importas -iu DEFAULT_PATH DEFAULT_PATH
-	importas -iu HOSTARCH HOSTARCH
-	importas -isu FETCH FETCH
-	importas -isu GLACIES_PACKAGES GLACIES_PACKAGES
-	importas -isu SU SU
-	importas -isu UNBZ2 UNBZ2
-	importas -isu UNLZ UNLZ
-	importas -ius UNTAR UNTAR
+backtick GLACIES_PACKAGES {
+	pipeline {
+		pipeline { venus-conf -t venus data/venus-store/config/root }
+		venus-conf -lt packages
+	}
+	backtick packages { ls data/packages }
+	importas -isu packages packages
+	grep -Fv -e$packages
 }
+envfile mk/env.conf
 if {
 	backtick -Ex mask { sh -c "umask" }
 	case -- $mask { "[0]+22" { exit 0 } }
@@ -34,6 +31,7 @@ if {
 	if {
 		cd arbor
 		if { ./bootstrap }
+		importas -isu GLACIES_PACKAGES GLACIES_PACKAGES
 		bin/arbor $GLACIES_PACKAGES
 	}
 	# explode stdenv
@@ -66,7 +64,7 @@ if {
 	if {
 		cd arbor
 		if { bin/arbor -p }
-		bin/arbor -o ../../mnt/venus-store/repo/disk
+		bin/arbor -o ../../mnt/venus-store/modules/venus/repo/disk
 	}
 	# prepare to chroot
 	if { mkdir -p dev sys proc tmp etc }
@@ -75,6 +73,10 @@ if {
 	cd etc
 	if { cp /etc/resolv.conf . }
 	touch fstab group passwd
+}
+multisubstitute {
+	importas -iu DEFAULT_PATH DEFAULT_PATH
+	importas -isu SU SU
 }
 $SU if {
 	# init store
@@ -85,10 +87,10 @@ $SU if {
 	if { mkdir -p mnt/opt }
 	if { cp -R venus/pm mnt/opt }
 	# copy data store
-	if { cp -R ../data/venus-store mnt }
+	if { cp -R ../data/venus-store/. mnt/venus-store }
 	if {
-		redirfd -a 1 mnt/venus-store/repo/disk/chksum
-		cd ../data/venus-store/cache
+		redirfd -a 1 mnt/venus-store/modules/venus/repo/disk/chksum
+		cd ../data/venus-store/modules/venus/cache
 		pipeline { ls } sed "s;^\\(.\\{128\\}\\)\\.\\(.*\\);\\2:\\1;"
 	}
 	# chroot
@@ -111,27 +113,11 @@ $SU if {
 	}
 	if { ln -s . usr }
 	if { ln -s bin sbin }
-	# store package list
-	if {
-		redirfd -w 1 opt/packages
-		printf "%s\n"
-		    glacies-etc
-		    glacies-scripts
-		    system-core
-		    ${GLACIES_PACKAGES}
-	}
-	# install packages
+	# sync
 	cd venus-store
-	if {
-		redo
-		    programs/glacies-etc
-		    programs/glacies-scripts
-		    programs/glacies-setup
-		    programs/system-core
-		    programs/${GLACIES_PACKAGES}
-	}
-	if { redo programs/populate }
-	redo cache/clean
+	if { ln -s ../.. sys/root }
+	if { redo sync }
+	redo clean
 }
 cd mnt
 if { mount -t tmpfs tmpfs tmp }

@@ -1,0 +1,70 @@
+modules{
+	venus
+}
+venus{
+	repo{
+		disk
+		glacies{
+			url:https://downloads.eltaninos.org/repo/glacies
+			safeurl:$url
+		}
+	}
+	packages{
+		# system core
+		bc
+		bzip2
+		ca-certificates
+		ccore
+		curl
+		dhcpcd
+		e2fsprogs
+		ecore
+		execline
+		fgetty
+		gzip
+		heirloom-doctools
+		iproute2
+		kbd
+		kmod
+		libressl
+		limine-bin
+		mandoc
+		mdevd
+		ncurses
+		neatvi
+		plzip
+		redo
+		s6
+		s6-linux-init
+		s6-rc
+		sh
+		tz
+		ubase
+		util-linux
+		venus
+		wpa-supplicant
+		xz
+		# glacies
+		system-core
+		glacies-etc
+		glacies-scripts
+		glacies-setup
+		# audio
+		alsa-utils
+		sndio
+		# gui
+		arcan
+		cat9
+		durden
+		font-ttf-anonymous-pro
+		font-ttf-montserrat
+		installer-tui
+		xwayland
+		xkbcomp
+		# gui apps
+		libreselene
+		# kernel
+		linux
+		linux-firmware
+	}
+}

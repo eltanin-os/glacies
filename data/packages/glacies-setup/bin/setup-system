@@ -15,24 +15,17 @@ if {
 if { ln -s . usr }
 if { ln -s bin sbin }
 if {
-	ifelse { $1 } {
-		if { echo "<message> copying online store..." }
-		if { cp -R /opt/pm venus-store }
-		cd venus-store
-		redo repo/update
-	}
-	if { echo "<message> copying offline store..." }
-	cp -R /venus-store .
+	if { cp -R /opt/pm venus-store }
+	if { cp /venus-store/config/root venus-store/config }
+	if -nt { $1 }
+	if { echo "<message> copying cache..." }
+	cp -R /venus-store/modules/venus/cache venus-store/modules/venus
 }
 if {
 	cd venus-store
-	if { rm root }
-	if { ln -s /mnt root }
-	backtick packages { cat /opt/packages }
-	importas -isu packages packages
-	# XXX: ARG_MAX
-	if { redo programs/$packages }
-	redo programs/populate
+	if { ln -s ../.. sys/root }
+	if { redo sync }
+	redo clean
 }
 if {
 	redirfd -a 1 ./etc/fstab
@@ -42,9 +35,6 @@ if {
 if { mount -t tmpfs tmpfs tmp }
 if {
 	chroot .
-	# venus-store
-	if { rm venus-store/root }
-	if { ln -s .. venus-store/root }
 	# certificates
 	if { mkdir -p etc/ssl/certs }
 	if { update-ca-certificates --fresh }

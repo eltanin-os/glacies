@@ -1,71 +1,7 @@
 #!/bin/execlineb -S1
-backtick tmpdir { mktemp -d }
-backtick version {
-	ifelse -Xn { test "${#}" = "0" } { echo $1 }
+cd /boot
+backtick -Ex version {
+	ifelse -n { test "${#}" = "0" } { echo $1 }
 	uname -r
 }
-multisubstitute {
-	importas -iu tmpdir tmpdir
-	importas -iu version version
-}
-cd $tmpdir
-# filesystem build
-if { mkdir -p etc/default bin dev lib/firmware run sys proc tmp }
-if { ln -s . usr }
-if { ln -s bin sbin }
-# files build
-if { touch etc/fstab }
-if {
-	backtick core { /venus-store/repo/get -t rundeps system-core }
-	importas -isu core core
-	forx -E package { $core }
-	elglob files "/venus-store/programs/${package}/*"
-	cp -R $files .
-}
-# /etc files
-if {
-	redirfd -w 1 etc/group
-	echo "root:x:0:"
-}
-if {
-	redirfd -w 1 etc/passwd
-	echo "root:x:0:0::/root:/bin/sh"
-}
-if {
-	redirfd -w 1 etc/mdev.conf
-	echo "$MODALIAS=.*    root:root 660 @modprobe -qb \"$MODALIAS\""
-}
-# modules build
-if {
-	pipeline {
-		fdclose 2
-		find
-		    /lib/modules/${version}/kernel/crypto
-		    /lib/modules/${version}/kernel/fs
-		    /lib/modules/${version}/kernel/drivers/ata
-		    /lib/modules/${version}/kernel/drivers/block
-		    /lib/modules/${version}/kernel/drivers/cdrom
-		    /lib/modules/${version}/kernel/drivers/firewire
-		    /lib/modules/${version}/kernel/drivers/md
-		    /lib/modules/${version}/kernel/drivers/scsi
-		    /lib/modules/${version}/kernel/drivers/usb/common
-		    /lib/modules/${version}/kernel/drivers/usb/core
-		    /lib/modules/${version}/kernel/drivers/usb/host
-		    /lib/modules/${version}/kernel/drivers/usb/storage
-		    /lib/modules/${version}/kernel/lib
-		    ! -type d
-	}
-	cpio -pLd .
-}
-if {
-	cd /lib/modules/${version}
-	if { install -cm 0755 modules.builtin lib/modules/${version} }
-	install -cm 0755 modules.order lib/modules/${version}
-}
-if { depmod -b . $version }
-# init build
-if { install -cm 0755 /etc/init.in init }
-pipeline { find . }
-pipeline { cpio -o -H newc }
-redirfd -w 1 /boot/initramfs-${version}
-pigz -9
+redo ${version}.initramfs

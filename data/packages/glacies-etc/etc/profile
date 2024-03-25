@@ -1,0 +1,28 @@
+getkey() {
+	(venus-conf -t /etc/s6/rc.conf $1 | venus-conf $2) 2>/dev/null
+}
+umask 022
+# ARCAN
+if LASH_SHELL="$(getkey arcan lash)"; then
+	export LASH_SHELL
+else
+	export LASH_SHELL="cat9"
+fi
+export LASH_BASE="/usr/share/arcan/lash"
+# XKB
+if XKB_DEFAULT_LAYOUT="$(getkey xkb layout)"; then
+	export XKB_DEFAULT_LAYOUT
+fi
+if XKB_DEFAULT_MODEL="$(getkey xkb model)"; then
+	export XKB_DEFAULT_MODEL
+fi
+if XKB_DEFAULT_OPTIONS="$(getkey xkb options)"; then
+	export XKB_DEFAULT_RULES
+fi
+if XKB_DEFAULT_RULES="$(getkey xkb rules)"; then
+	export XKB_DEFAULT_RULES
+fi
+if XKB_DEFAULT_VARIANT="$(getkey xkb variant)"; then
+	export XKB_DEFAULT_VARIANT
+fi
+# YOUR CUSTOM VARIABLES BELOW

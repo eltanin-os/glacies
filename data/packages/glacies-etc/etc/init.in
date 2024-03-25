@@ -12,66 +12,70 @@ foreground {
 	kill $!
 
 }
-backtick root {
-	awk "
-		BEGIN {
-			FS=\"=\"
-			RS=\" \"
-			OFS=\"=\"
-		}
-		/root=/ {
-			gsub(\"root=\", \"\")
-			print
-		}
-	"
-	/proc/cmdline
-}
-backtick rootflags {
-	awk "
-		BEGIN {
-			FS=\"=\";
-			RS=\" \";
-		}
-		/rootflags=/ {
-			print $2
-		}
-	"
-	/proc/cmdline
-}
-backtick rootfstype {
-	awk "
-		BEGIN {
-			FS=\"=\";
-			RS=\" \";
-		}
-		/rootfstype=/ {
-			print $2
-		}
-	"
-	/proc/cmdline
-}
-multisubstitute {
-	importas -iu root root
-	importas -iu rootflags rootflags
-	importas -iu rootfstype rootfstype
-}
-backtick -Ex device {
-	case -- $root {
-	"UUID=.*" {
-		pipeline { echo $root }
-		awk -F"=" "{ print \"/dev/disk/by-uuid/\"$2 }"
-	}
-	"LABEL=.*" {
-		pipeline { echo $root }
-		awk -F"=" "{ print \"/dev/disk/by-label/\"$2 }"
-	}
-	}
-	echo $root
-}
-if { mkdir .root }
-if { mount -nt $rootfstype -o $rootflags $device .root }
 if {
-	backtick -xED "eltanin-glacies" hostname { cat .root/etc/hostname }
+	if { mkdir .root }
+	backtick root {
+		awk "
+			BEGIN {
+				FS=\"=\"
+				RS=\" \"
+				OFS=\"=\"
+			}
+			/root=/ {
+				gsub(\"root=\", \"\")
+				print
+			}
+		"
+		/proc/cmdline
+	}
+	backtick rootflags {
+		awk "
+			BEGIN {
+				FS=\"=\";
+				RS=\" \";
+			}
+			/rootflags=/ {
+				print $2
+			}
+		"
+		/proc/cmdline
+	}
+	backtick rootfstype {
+		awk "
+			BEGIN {
+				FS=\"=\";
+				RS=\" \";
+			}
+			/rootfstype=/ {
+				print $2
+			}
+		"
+		/proc/cmdline
+	}
+	multisubstitute {
+		importas -iu root root
+		importas -iu rootflags rootflags
+		importas -iu rootfstype rootfstype
+	}
+	backtick -Ex device {
+		case -- $root {
+		"UUID=.*" {
+			pipeline { echo $root }
+			awk -F"=" "{ print \"/dev/disk/by-uuid/\"$2 }"
+		}
+		"LABEL=.*" {
+			pipeline { echo $root }
+			awk -F"=" "{ print \"/dev/disk/by-label/\"$2 }"
+		}
+		}
+		echo $root
+	}
+	mount -nt $rootfstype -o $rootflags $device .root
+}
+if {
+	backtick -xED "eltanin-glacies" hostname {
+		venus-conf hostname .root/etc/s6/rc.conf
+	}
 	hostname $hostname
 }
 if { mount -o move /dev .root/dev }

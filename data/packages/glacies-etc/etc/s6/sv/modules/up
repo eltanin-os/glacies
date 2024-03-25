@@ -1,3 +1,11 @@
 #!/bin/execlineb -P
-if -t { test -s /etc/modules }
-pipeline { cat /etc/modules } xargs modprobe -aq
+backtick -D "" modules {
+	redirfd -w 2 /dev/null
+	venus-conf -t /etc/s6/rc.conf modules
+}
+if -t {
+	importas -iu modules modules
+	test -n "${modules}"
+}
+importas -isu modules modules
+modprobe -aq $modules

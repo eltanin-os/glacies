@@ -4,7 +4,7 @@ backtick tmpdir { mktemp -d }
 multisubstitute {
 	importas -isu SU SU
 	importas -iu tmpdir tmpdir
-	define PROGRAMS "build/mnt/venus-store/programs"
+	define PROGRAMS "build/mnt/venus-store/modules/venus/root.progs"
 }
 # IMAGE
 if {
@@ -33,7 +33,7 @@ if {
 PROTOCOL=linux
 KERNEL_PATH=boot:///boot/vmlinuz-${kversion}
 CMDLINE=quiet
-MODULE_PATH=boot:///boot/initramfs-${kversion}
+MODULE_PATH=boot:///boot/${kversion}.initramfs
 "
 	redirfd -w 1 ${tmpdir}/boot/limine.cfg
 	cat
@@ -58,5 +58,5 @@ if {
 	    -o output.iso
 	    $tmpdir
 }
-if { build/mnt/venus-store/programs/limine-bin/bin/limine bios-install output.iso }
+if { ${PROGRAMS}/limine-bin/bin/limine bios-install output.iso }
 rm -Rf $tmpdir

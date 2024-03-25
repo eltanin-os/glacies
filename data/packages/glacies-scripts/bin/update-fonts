@@ -4,7 +4,14 @@ if {
 	backtick -Ex user { whoami }
 	test "root" = "${user}"
 }
-envfile /etc/s6/rc.conf
+backtick FONT_DEFAULT {
+	pipeline { venus-conf -t font /etc/s6/rc.conf }
+	venus-conf default
+}
+backtick FONT_MONO {
+	pipeline { venus-conf -t font /etc/s6/rc.conf }
+	venus-conf mono
+}
 multisubstitute {
 	define ARCAN_FONTDIR "/usr/share/arcan/resources/fonts"
 	define FONTDIR "/usr/share/fonts"
