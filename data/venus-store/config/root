@@ -59,6 +59,7 @@ venus{
 		font-ttf-anonymous-pro
 		font-ttf-montserrat
 		installer-tui
+		xarcan
 		xwayland
 		xkbcomp
 		# gui apps
